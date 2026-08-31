@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧢 SmartCap Catalog (Katalog Topi Pintar)
 
-## Getting Started
+## 1. Latar Belakang Masalah (Problem Statement)
+Pemilik usaha fashion (khususnya aksesoris topi) memiliki ratusan SKU produk yang belum terdigitalisasi. Memasukkan data dan merangkai deskripsi penjualan satu per satu untuk berbagai jenis topi memakan waktu terlalu lama dan menghambat proses penjualan online.
 
-First, run the development server:
+## 2. Solusi (Proposed Solution)
+Membangun platform etalase mandiri (Katalog Digital) berbasis web yang dilengkapi fitur **AI Product Ingestion**. Pengguna cukup mengunggah foto dan nama dasar produk, lalu AI akan menyusun deskripsi komersial, detail material, dan kategori secara otomatis (bulk-generate).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 3. Arsitektur & Teknologi (Tech Stack)
+* **Kerangka Kerja:** Next.js (App Router, Fullstack)
+* **Database:** Turso (Edge SQLite) via Drizzle ORM
+* **AI Engine:** Google AI Studio (Gemini API) untuk *auto-copywriting*
+* **Deployment:** Tencent EdgeOne
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 4. Fitur Inti (Minimum Viable Product)
+- [ ] **Form Upload Massal** (gambar & nama topi).
+- [ ] **Review & Edit Table** (pratinjau hasil generate AI sebelum masuk database).
+- [ ] **Etalase Publik** dengan *dynamic routing* untuk menampilkan koleksi graphic baseball cap atau model topi lainnya.
+- [ ] **Direct Checkout** (Tombol checkout direct ke WhatsApp).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📋 To-Do List & Progres (Hari Pertama - 31 Agustus)
 
-## Learn More
+Agar pengerjaan efisien, keempat orang dalam tim memegang peran spesifik di Fase Inisialisasi ini:
 
-To learn more about Next.js, take a look at the following resources:
+### 1. Rai (Logic & Deployment / AI & DevOps)
+- [x] Inisialisasi proyek Next.js dan repositori GitHub.
+- [x] Push kerangka awal ke GitHub dan hubungkan langsung ke Tencent EdgeOne untuk memastikan pipeline deployment berjalan mulus.
+- [ ] Buat dan uji coba prompt utama di Google AI Studio untuk meracik deskripsi otomatis.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Owen (Database & Backend)
+- [ ] Buat akun dan database baru di Turso.
+- [ ] Pasang Drizzle ORM di Next.js.
+- [ ] Rancang skema tabel `products` (ID, nama, deskripsi AI, harga, gambar, stok). **(Telah di-push ke cloud Turso)**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Josi (Frontend / UI Admin - Quality Assurance)
+- [x] Setup Tailwind CSS dan komponen UI dasar (menggunakan shadcn/ui).
+- [ ] Bangun halaman dashboard admin, khususnya antarmuka tabel untuk mereviu hasil generate AI.
 
-## Deploy on Vercel
+### 4. Dhany (Frontend / UI Publik - Presentation & Media)
+- [x] Bangun kerangka halaman etalase publik (Katalog) di `app/page.tsx`.
+- [ ] Siapkan kumpulan foto aset (dummy data) berbagai model topi untuk bahan testing upload.
+- [ ] Mulai pelajari format Lembar Orisinalitas dan Lembar Penggunaan AI untuk dicicil pengisiannya.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> *Membagi alur seperti di atas memastikan tidak ada anggota tim yang menganggur atau coding di berkas yang sama sehingga meminimalisir conflict di GitHub.*
