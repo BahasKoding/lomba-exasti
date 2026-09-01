@@ -62,30 +62,30 @@ export default function Storefront() {
             <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Snapback</Link>
           </nav>
           <div className="flex items-center gap-4">
-             <Link href="/admin" className="hidden md:block">
-               <Button variant="outline" size="sm">Admin Login</Button>
-             </Link>
-             <Sheet>
-               <SheetTrigger className={buttonVariants({ variant: "ghost", size: "icon", className: "md:hidden" })}>
-                 <Menu className="h-5 w-5" />
-                 <span className="sr-only">Toggle Menu</span>
-               </SheetTrigger>
-               <SheetContent side="right">
-                 <SheetHeader>
-                   <SheetTitle>Menu</SheetTitle>
-                 </SheetHeader>
-                 <nav className="flex flex-col gap-4 mt-8 text-sm font-medium">
-                   <Link href="#" className="transition-colors hover:text-foreground/80">Semua</Link>
-                   <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Baseball Cap</Link>
-                   <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Bucket Hat</Link>
-                   <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Snapback</Link>
-                   <hr className="my-2" />
-                   <Link href="/admin">
-                     <Button variant="outline" className="w-full">Admin Login</Button>
-                   </Link>
-                 </nav>
-               </SheetContent>
-             </Sheet>
+            <Link href="/admin" className="hidden md:block">
+              <Button variant="outline" size="sm">Admin Login</Button>
+            </Link>
+            <Sheet>
+              <SheetTrigger className={buttonVariants({ variant: "ghost", size: "icon", className: "md:hidden" })}>
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-4 mt-8 text-sm font-medium">
+                  <Link href="#" className="transition-colors hover:text-foreground/80">Semua</Link>
+                  <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Baseball Cap</Link>
+                  <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Bucket Hat</Link>
+                  <Link href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Snapback</Link>
+                  <hr className="my-2" />
+                  <Link href="/admin">
+                    <Button variant="outline" className="w-full">Admin Login</Button>
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
@@ -106,15 +106,15 @@ export default function Storefront() {
           <h2 className="text-2xl font-bold tracking-tight">Koleksi Terbaru</h2>
           <Badge variant="secondary">4 Produk</Badge>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {publicProducts.map((product) => (
             <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300">
               <div className="relative aspect-square overflow-hidden bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
+                <img
+                  src={product.image}
+                  alt={product.name}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
@@ -131,10 +131,10 @@ export default function Storefront() {
                 <div className="font-semibold text-lg">{product.price}</div>
               </CardContent>
               <CardFooter className="p-4 pt-0">
-                <a 
-                  className={buttonVariants({ variant: "default", className: "w-full gap-2" })} 
-                  href={`https://wa.me/${adminWhatsApp}?text=Halo%20Admin,%20saya%20ingin%20memesan%20${encodeURIComponent(product.name)}`} 
-                  target="_blank" 
+                <a
+                  className={buttonVariants({ variant: "default", className: "w-full gap-2" })}
+                  href={`https://wa.me/${adminWhatsApp}?text=Halo%20Admin,%20saya%20ingin%20memesan%20${encodeURIComponent(product.name)}`}
+                  target="_blank"
                   rel="noreferrer"
                 >
                   <ShoppingCart className="h-4 w-4" />

@@ -30,9 +30,9 @@ Agar pengerjaan efisien, keempat orang dalam tim memegang peran spesifik di Fase
 - [ ] Buat dan uji coba prompt utama di Google AI Studio untuk meracik deskripsi otomatis.
 
 ### 2. Owen (Database & Backend)
-- [ ] Buat akun dan database baru di Turso.
-- [ ] Pasang Drizzle ORM di Next.js.
-- [ ] Rancang skema tabel `products` (ID, nama, deskripsi AI, harga, gambar, stok). **(Telah di-push ke cloud Turso)**
+- [x] Buat akun dan database baru di Turso.
+- [x] Pasang Drizzle ORM di Next.js.
+- [x] Rancang skema tabel `products` (ID, nama, deskripsi AI, harga, gambar, stok). **(Telah di-push ke cloud Turso)**
 
 ### 3. Josi (Frontend / UI Admin - Quality Assurance)
 - [x] Setup Tailwind CSS dan komponen UI dasar (menggunakan shadcn/ui).
