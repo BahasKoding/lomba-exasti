@@ -223,7 +223,7 @@ export function CatalogHome() {
               {/* View Catalog Link on Bottom Right under Col 4 matching wireframe */}
               <div className="mt-4 flex justify-end">
                 <Link
-                  href="#collections"
+                  href="/katalog"
                   className="group inline-flex items-center gap-1.5 text-sm font-black uppercase tracking-widest text-[#1F2022] transition hover:underline"
                 >
                   View Catalog

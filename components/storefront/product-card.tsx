@@ -1,64 +1,78 @@
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { Plus } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildOrderWhatsAppUrl, formatPrice, type CatalogProduct } from "@/lib/public-catalog";
 
 export function ProductCard({ product }: { product: CatalogProduct }) {
-  const inStock = product.stockCount > 0;
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const raw = localStorage.getItem("cart");
+      const cart = raw ? JSON.parse(raw) : [];
+      cart.push({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        category: product.category,
+      });
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } catch (err) {}
+
+    alert(`"${product.name}" telah ditambahkan ke Keranjang (Cart)!`);
+  };
+
+  const categoryLabel = product.category ?? product.material ?? "Topi Collection";
 
   return (
-    <Card className="group overflow-hidden rounded-3xl border border-[#E5E2DC] bg-[#FFFFFF] shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-      <Link href={`/produk/${product.slug}`} className="block">
-        <div className="relative overflow-hidden bg-[#F3F1ED]">
-          <img src={product.imageUrl} alt={product.name} className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-            {product.category ? (
-              <Badge variant="outline" className="rounded-full border-[#E5E2DC] bg-[#FCFAF7]/90 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#1F2022] backdrop-blur-xs">
-                {product.category}
-              </Badge>
-            ) : null}
-            <Badge variant="outline" className="rounded-full border-[#E5E2DC] bg-[#FCFAF7]/90 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#1F2022] backdrop-blur-xs">
-              {inStock ? "Ready stock" : "Habis"}
-            </Badge>
-          </div>
+    <Link
+      href={`/produk/${product.slug}`}
+      className="group flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1"
+    >
+      {/* Square Image Box (Aspect 1:1) with Rounded 2XL - Clean without floating badge inside */}
+      <div className="overflow-hidden rounded-2xl bg-[#E5E2DC] shadow-xs transition-shadow duration-300 group-hover:shadow-md">
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          className="aspect-square w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+        />
+      </div>
+
+      {/* Card Info: Product Name, Category Text Below Name, Price & Plus (+) Cart Button */}
+      <div className="mt-3.5 flex items-start justify-between gap-2 px-1">
+        <div className="flex-1 min-w-0">
+          {/* Product Name */}
+          <h3 className="truncate text-sm font-extrabold uppercase tracking-wider text-[#1F2022] group-hover:underline">
+            {product.name}
+          </h3>
+          
+          {/* Category Text (Below Product Name) */}
+          <p className="mt-0.5 truncate text-xs font-semibold text-[#94908C]">
+            {categoryLabel}
+          </p>
+
+          {/* Price */}
+          <p className="mt-1.5 text-sm font-black text-[#1F2022]">
+            {formatPrice(product.price)}
+          </p>
         </div>
 
-        <CardHeader className="px-5 pb-2 pt-5">
-          <CardTitle className="text-xl font-black tracking-tight text-[#1F2022]">{product.name}</CardTitle>
-        </CardHeader>
-
-        <CardContent className="px-5 pb-4">
-          <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-[#94908C]">{product.description || "Deskripsi produk akan tampil setelah hasil AI disimpan."}</p>
-          <div className="flex items-center justify-between border-t border-[#E5E2DC] pt-3.5">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-[#94908C]">{product.material ? "Material" : "Stok"}</p>
-              <p className="mt-0.5 text-xs font-bold text-[#1F2022]">{product.material ?? `${product.stockCount} pcs`}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-[#94908C]">Harga</p>
-              <p className="mt-0.5 text-lg font-black text-[#1F2022]">{formatPrice(product.price)}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Link>
-
-      <CardFooter className="flex gap-2.5 px-5 pb-5 pt-0">
-        <Link href={`/produk/${product.slug}`} className={buttonVariants({ variant: "outline", className: "flex-1 rounded-full border-[#E5E2DC] text-xs font-semibold text-[#1F2022] hover:bg-[#F3F1ED]" })}>
-          Detail
-        </Link>
-        <a
-          className={buttonVariants({ variant: "default", className: "flex-1 gap-2 rounded-full bg-[#1F2022] text-xs font-semibold text-[#FCFAF7] hover:bg-[#1F2022]/90" })}
-          href={buildOrderWhatsAppUrl(product)}
-          target="_blank"
-          rel="noreferrer"
+        {/* Circular Plus (+) Add-to-Cart Button */}
+        <button
+          type="button"
+          aria-label={`Tambah ${product.name} ke Keranjang`}
+          onClick={handleAddToCart}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#1F2022] text-[#1F2022] transition-all duration-300 hover:bg-[#1F2022] hover:text-[#FCFAF7] hover:scale-110 shadow-xs"
+          title="Tambah ke Keranjang"
         >
-          <ShoppingCart className="h-3.5 w-3.5" />
-          Beli
-        </a>
-      </CardFooter>
-    </Card>
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+    </Link>
   );
 }
+
+

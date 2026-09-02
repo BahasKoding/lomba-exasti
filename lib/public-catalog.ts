@@ -42,7 +42,7 @@ export function normalizeCatalogProduct(raw: unknown, index = 0): CatalogProduct
     id: asText(item.id ?? item.productId ?? item.product_id, `${slug}-${index}`),
     name,
     slug,
-    description: asText(item.AI_description ?? item.ai_description ?? item.description ?? item.generated_description),
+    description: asText(item.aiDescription ?? item.AI_description ?? item.ai_description ?? item.description ?? item.generated_description),
     price: asNumber(item.price),
     imageUrl: asText(item.imageUrl ?? item.image_url ?? item.image, PLACEHOLDER_IMAGE),
     stockCount: asNumber(item.stock_count ?? item.stockCount ?? item.stock),
