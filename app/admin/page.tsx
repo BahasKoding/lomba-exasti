@@ -6,14 +6,12 @@ import { UploadCloud } from "lucide-react";
 
 export default function AdminDashboard() {
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 p-8">
+      <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Upload Massal</h1>
         <Button>Mulai Generate AI</Button>
       </div>
-      <p className="text-muted-foreground">
-        Unggah banyak gambar produk sekaligus. Sistem AI akan otomatis mendeteksi bahan, gaya, dan merangkai deskripsi.
-      </p>
+      <p className="text-muted-foreground">Unggah banyak gambar produk sekaligus. Sistem AI akan otomatis mendeteksi bahan, gaya, dan merangkai deskripsi.</p>
 
       <Card>
         <CardHeader>
@@ -21,12 +19,14 @@ export default function AdminDashboard() {
           <CardDescription>Drag and drop gambar produk topi ke sini atau klik untuk memilih file.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center text-center hover:bg-accent/50 cursor-pointer transition-colors">
-            <UploadCloud className="h-10 w-10 text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg">Tarik & Lepas Gambar</h3>
-            <p className="text-sm text-muted-foreground mt-1 mb-4">Mendukung format JPG, PNG, WEBP (maks 5MB per file)</p>
+          <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center transition-colors hover:bg-accent/50">
+            <UploadCloud className="mb-4 h-10 w-10 text-muted-foreground" />
+            <h3 className="text-lg font-semibold">Tarik & Lepas Gambar</h3>
+            <p className="mt-1 mb-4 text-sm text-muted-foreground">Mendukung format JPG, PNG, WEBP (maks 5MB per file)</p>
             <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="picture" className="sr-only">Pilih File</Label>
+              <Label htmlFor="picture" className="sr-only">
+                Pilih File
+              </Label>
               <Input id="picture" type="file" multiple accept="image/*" />
             </div>
           </div>
