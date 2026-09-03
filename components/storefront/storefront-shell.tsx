@@ -1,23 +1,37 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/katalog", label: "Catalog" },
-  { href: "/#about", label: "About" },
-  { href: "/#cart", label: "Cart" },
-];
-
 export function StorefrontShell({ children }: { children: React.ReactNode }) {
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if admin is logged in via localStorage or cookie
+    const isLogged =
+      typeof window !== "undefined" &&
+      (localStorage.getItem("admin_logged_in") === "true" ||
+        document.cookie.includes("admin_logged_in=true"));
+    setIsAdminLoggedIn(!!isLogged);
+  }, []);
+
+  const navItems = [
+    { href: "/", label: isAdminLoggedIn ? "Dashboard" : "Home" },
+    { href: "/katalog", label: "Catalog" },
+    { href: "/#about", label: "About" },
+    { href: "/#cart", label: "Cart" },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FCFAF7] via-[#F5F2ED] to-[#E3DFD7] font-sans text-[#1F2022]">
       {/* Header Navbar */}
       <header className="sticky top-0 z-50 w-full border-b border-[#E5E2DC] bg-[#FCFAF7]/90 backdrop-blur-md">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Header Brand Logo - Clean typography without solid black box */}
+        <div className="relative mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          {/* Header Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E5E2DC] bg-white text-[#1F2022] font-black text-sm shadow-xs group-hover:border-[#1F2022] transition-colors">
               SC
@@ -32,10 +46,11 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-10 md:flex">
+          {/* Centered Navigation Links */}
+          <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-10">
             {navItems.map((item) => (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 className="relative py-1 text-sm font-semibold text-[#1F2022] transition-colors duration-300 hover:opacity-80 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#1F2022] hover:after:w-full after:transition-all after:duration-300"
               >
@@ -44,10 +59,23 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
+          {/* Far Right Action: Admin Badge (if logged in) or Login link */}
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-semibold text-[#1F2022] transition hover:opacity-70">
-              Login
-            </Link>
+            {isAdminLoggedIn ? (
+              <Link
+                href="/admin"
+                className="relative inline-flex items-center gap-2 rounded-full border border-[#1F2022] bg-[#1F2022] px-4 py-1.5 text-xs font-extrabold tracking-wide text-[#FCFAF7] shadow-xs hover:scale-105 transition-transform"
+              >
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="underline underline-offset-4 decoration-2 decoration-white/70">Admin</span>
+              </Link>
+            ) : (
+              <Link href="/login" className="text-sm font-semibold text-[#1F2022] transition hover:opacity-70">
+                Login
+              </Link>
+            )}
+
+            {/* Mobile Sheet Drawer */}
             <Sheet>
               <SheetTrigger className={buttonVariants({ variant: "ghost", size: "icon", className: "md:hidden text-[#1F2022]" })}>
                 <Menu className="h-5 w-5" />
@@ -59,13 +87,20 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
                 </SheetHeader>
                 <nav className="mt-8 flex flex-col gap-5 text-base font-semibold text-[#1F2022]">
                   {navItems.map((item) => (
-                    <Link key={item.href} href={item.href} className="hover:opacity-70">
+                    <Link key={item.label} href={item.href} className="hover:opacity-70">
                       {item.label}
                     </Link>
                   ))}
-                  <Link href="/login" className="mt-4 inline-block font-bold text-[#1F2022] underline">
-                    Login
-                  </Link>
+                  {isAdminLoggedIn ? (
+                    <Link href="/admin" className="mt-4 inline-flex items-center gap-2 font-bold text-[#1F2022]">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                      Panel Admin
+                    </Link>
+                  ) : (
+                    <Link href="/login" className="mt-4 inline-block font-bold text-[#1F2022] underline">
+                      Login
+                    </Link>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>
