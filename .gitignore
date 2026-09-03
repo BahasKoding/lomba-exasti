@@ -26,6 +26,11 @@
 .DS_Store
 *.pem
 
+# local test artifacts
+test-payload.json
+test-save.json
+test-ai.ts
+
 # debug
 npm-debug.log*
 yarn-debug.log*
