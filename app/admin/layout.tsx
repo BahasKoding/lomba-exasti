@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, LayoutDashboard, Settings, Menu } from "lucide-react";
+import { Package, LayoutDashboard, Settings, Menu, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -25,6 +25,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
               <Settings className="h-4 w-4" />
               Pengaturan
+            </Link>
+            <Link href="/login" className="flex items-center gap-2 rounded-lg px-3 py-2 text-red-500 hover:bg-red-50 hover:text-red-600 mt-4">
+              <LogOut className="h-4 w-4" />
+              Logout
             </Link>
           </nav>
         </aside>
@@ -56,6 +60,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link href="/admin/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                     <Settings className="h-4 w-4" />
                     Pengaturan
+                  </Link>
+                  <Link href="/login" className="flex items-center gap-2 rounded-lg px-3 py-2 text-red-500 hover:bg-red-50 hover:text-red-600 mt-4">
+                    <LogOut className="h-4 w-4" />
+                    Logout
                   </Link>
                 </nav>
               </SheetContent>

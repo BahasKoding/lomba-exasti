@@ -21,7 +21,7 @@ export default function LoginPage() {
       {/* Back to storefront link */}
       <Link
         href="/"
-        className="absolute left-6 top-6 z-10 inline-flex items-center gap-2 text-xs font-semibold text-[#1F2022] transition hover:opacity-70"
+        className="absolute left-10 top-10 z-10 inline-flex items-center gap-2 text-xs font-semibold text-[#1F2022] transition hover:opacity-70"
       >
         <ArrowLeft className="h-4 w-4" />
         Kembali ke Etalase
@@ -30,7 +30,7 @@ export default function LoginPage() {
       <div className="grid w-full grid-cols-1 lg:grid-cols-2">
         {/* Left Side: Cap Image Showcase */}
         <div className="hidden items-center justify-center p-8 lg:flex">
-          <div className="relative h-full max-h-[720px] w-full overflow-hidden rounded-3xl bg-[#E5E2DC]">
+          <div className="relative h-[600px] w-full max-w-[500px] overflow-hidden rounded-3xl bg-[#E5E2DC]">
             <img
               src="https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=1200&q=80"
               alt="Gambar Topi"
