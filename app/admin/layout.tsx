@@ -18,8 +18,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  const handleLogout = (e: React.MouseEvent) => {
+  const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
     if (typeof window !== "undefined") {
       localStorage.removeItem("admin_logged_in");
       document.cookie = "admin_logged_in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
@@ -103,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </SheetHeader>
                 <div className="mt-6 flex flex-col gap-6">
                   <div className="flex flex-col gap-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94908C]">Navigasi Utama</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94908C]">Main Navigation</span>
                     {navItems.map((item) => (
                       <Link key={item.label} href={item.href} className="text-base font-bold text-[#1F2022] hover:opacity-70">
                         {item.label}
@@ -111,7 +116,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     ))}
                   </div>
                   <div className="border-t border-[#E5E2DC] pt-4 flex flex-col gap-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#94908C]">Menu Admin</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#94908C]">Admin Menu</span>
                     {sidebarItems.map((item) => (
                       <Link key={item.label} href={item.href} className="text-sm font-semibold text-[#1F2022] hover:opacity-70">
                         {item.label}
@@ -172,6 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+
 
 
 

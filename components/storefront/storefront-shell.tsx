@@ -94,7 +94,7 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
                   {isAdminLoggedIn ? (
                     <Link href="/admin" className="mt-4 inline-flex items-center gap-2 font-bold text-[#1F2022]">
                       <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                      Panel Admin
+                      Admin Panel
                     </Link>
                   ) : (
                     <Link href="/login" className="mt-4 inline-block font-bold text-[#1F2022] underline">

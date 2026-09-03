@@ -10,7 +10,7 @@ import { fetchCatalog, type CatalogProduct } from "@/lib/public-catalog";
 
 // Categories derived strictly from the storefront footer
 const FOOTER_CATEGORIES = [
-  "Semua",
+  "All",
   "Baseball Cap",
   "Trucker Cap",
   "Bucket Hat",
@@ -23,7 +23,7 @@ const fallbackProducts: CatalogProduct[] = [
     id: "f1",
     name: "Urban Baseball Cap Classic",
     slug: "urban-baseball-cap-classic",
-    description: "Topi baseball bergaya urban dari bahan Cotton Twill premium, nyaman dipakai sehari-hari.",
+    description: "Urban style baseball cap in premium Cotton Twill, comfortable for daily wear.",
     price: 149000,
     imageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80",
     stockCount: 12,
@@ -34,7 +34,7 @@ const fallbackProducts: CatalogProduct[] = [
     id: "f2",
     name: "Classic Bucket Hat Denim",
     slug: "classic-bucket-hat-denim",
-    description: "Bucket hat kain denim teratur tahan air dengan estetika outdoor santai.",
+    description: "Waterproof denim bucket hat with casual outdoor aesthetics.",
     price: 129000,
     imageUrl: "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=600&q=80",
     stockCount: 8,
@@ -45,7 +45,7 @@ const fallbackProducts: CatalogProduct[] = [
     id: "f3",
     name: "Vintage Snapback Hip-Hop",
     slug: "vintage-snapback-hip-hop",
-    description: "Snapback gaya vintage dengan korduroi premium dan visor terstruktur tajam.",
+    description: "Vintage style snapback with premium corduroy and sharp structured visor.",
     price: 150000,
     imageUrl: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=600&q=80",
     stockCount: 15,
@@ -56,7 +56,7 @@ const fallbackProducts: CatalogProduct[] = [
     id: "f4",
     name: "Trucker Hat Foam Panel Sporty",
     slug: "trucker-hat-foam-panel-sporty",
-    description: "Topi trucker dengan jaring breathable di bagian belakang untuk sirkulasi udara maksimal.",
+    description: "Sporty trucker hat with breathable rear mesh for maximum airflow.",
     price: 98000,
     imageUrl: "https://images.unsplash.com/photo-1517423568366-8b98471794e0?auto=format&fit=crop&w=600&q=80",
     stockCount: 19,
@@ -67,7 +67,7 @@ const fallbackProducts: CatalogProduct[] = [
     id: "f5",
     name: "Minimalist Baseball Dad Hat",
     slug: "minimalist-baseball-dad-hat",
-    description: "Baseball cap gaya dad hat minimalis dengan aksen bordir eksklusif di samping.",
+    description: "Minimalist dad hat baseball cap with exclusive side embroidery detail.",
     price: 139000,
     imageUrl: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=600&q=80",
     stockCount: 5,
@@ -78,7 +78,7 @@ const fallbackProducts: CatalogProduct[] = [
     id: "f6",
     name: "Outdoor Bucket Hat Safari",
     slug: "outdoor-bucket-hat-safari",
-    description: "Topi outdoor bucket hat ideal untuk petualangan dengan tali dagu yang fleksibel.",
+    description: "Outdoor safari bucket hat ideal for adventures with a flexible chin strap.",
     price: 169000,
     imageUrl: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?auto=format&fit=crop&w=600&q=80",
     stockCount: 10,
@@ -96,7 +96,7 @@ function CatalogContent() {
   
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<string>("terbaru");
 
   useEffect(() => {
@@ -141,7 +141,7 @@ function CatalogContent() {
     let result = [...products];
 
     // Filter by Category
-    if (selectedCategory !== "Semua") {
+    if (selectedCategory !== "All") {
       result = result.filter((item) => {
         const cat = item.category?.toLowerCase() || "";
         const target = selectedCategory.toLowerCase();
@@ -176,17 +176,17 @@ function CatalogContent() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
       
-      {/* PAGE HERO HEADER (Matching Home Style: Inter Black, Uppercase Tracking 15%) */}
+      {/* PAGE HERO HEADER */}
       <div className="space-y-3">
         <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-[0.15em] text-[#1F2022]">
-          Katalog Topi
+          Cap Catalog
         </h1>
         <p className="max-w-2xl text-sm sm:text-base font-medium leading-relaxed text-[#1F2022]/80">
-          Temukan koleksi topi lengkap untuk komunitas & gaya fashion sehari-hari.
+          Explore our complete collection of caps designed for community & everyday fashion.
         </p>
       </div>
 
-      {/* FILTER & CONTROL BAR (Clean, aesthetic rounded-3xl container) */}
+      {/* FILTER & CONTROL BAR */}
       <div className="overflow-hidden rounded-3xl border border-[#E5E2DC] bg-[#FFFFFF] p-6 shadow-xs space-y-5">
         
         {/* Search Input & Sort Dropdown Row */}
@@ -197,7 +197,7 @@ function CatalogContent() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari topi berdasarkan nama, kategori, atau deskripsi..."
+              placeholder="Search caps by name, category, or description..."
               className="w-full h-11 rounded-2xl border border-[#E5E2DC] bg-[#FCFAF7] pl-11 pr-4 text-sm font-semibold text-[#1F2022] placeholder-[#94908C] outline-none transition-colors focus:border-[#1F2022] focus:bg-white"
             />
           </div>
@@ -205,25 +205,25 @@ function CatalogContent() {
           <div className="flex items-center gap-3 shrink-0">
             <div className="flex items-center gap-2 rounded-2xl border border-[#E5E2DC] bg-[#FCFAF7] px-4 py-2.5 text-xs font-bold text-[#1F2022]">
               <SlidersHorizontal className="h-3.5 w-3.5 text-[#94908C]" />
-              <span className="text-[#94908C]">Urutkan:</span>
+              <span className="text-[#94908C]">Sort by:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-transparent font-extrabold text-[#1F2022] outline-none cursor-pointer"
               >
-                <option value="terbaru">Terbaru</option>
-                <option value="harga-asc">Harga: Terendah</option>
-                <option value="harga-desc">Harga: Tertinggi</option>
-                <option value="nama-asc">Nama: A-Z</option>
+                <option value="terbaru">Latest</option>
+                <option value="harga-asc">Price: Low to High</option>
+                <option value="harga-desc">Price: High to Low</option>
+                <option value="nama-asc">Name: A-Z</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Category Pills (Dynamic from DB + Footer categories) */}
+        {/* Category Pills */}
         <div className="flex flex-wrap items-center gap-2.5 pt-1 border-t border-[#E5E2DC]/60">
           <span className="text-xs font-extrabold uppercase tracking-wider text-[#94908C] mr-2">
-            Kategori:
+            Category:
           </span>
           {availableCategories.map((category) => {
             const isActive = selectedCategory === category;
@@ -248,9 +248,9 @@ function CatalogContent() {
       {/* PRODUCT COUNT INDICATOR */}
       <div className="flex items-center justify-between text-sm font-bold text-[#1F2022]">
         <p>
-          Menampilkan <span className="text-amber-700 font-extrabold">{filteredProducts.length}</span> produk
+          Showing <span className="text-amber-700 font-extrabold">{filteredProducts.length}</span> product{filteredProducts.length !== 1 && "s"}
         </p>
-        {selectedCategory !== "Semua" && (
+        {selectedCategory !== "All" && (
           <span className="text-xs font-semibold text-[#94908C]">
             Filter: <span className="text-[#1F2022] font-bold">{selectedCategory}</span>
           </span>
@@ -261,23 +261,23 @@ function CatalogContent() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#94908C] space-y-3">
           <Loader className="h-8 w-8 animate-spin text-[#1F2022]" />
-          <p className="text-sm font-semibold">Memuat koleksi katalog topi...</p>
+          <p className="text-sm font-semibold">Loading cap collection...</p>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="rounded-3xl border border-[#E5E2DC] bg-white p-12 text-center shadow-xs space-y-3">
-          <p className="text-base font-bold text-[#1F2022]">Tidak ditemukan topi yang cocok</p>
+          <p className="text-base font-bold text-[#1F2022]">No matching caps found</p>
           <p className="text-xs text-[#94908C]">
-            Coba ubah kata kunci pencarian atau pilih kategori lain.
+            Try changing your search keywords or select another category.
           </p>
           <button
             type="button"
             onClick={() => {
               setSearchQuery("");
-              setSelectedCategory("Semua");
+              setSelectedCategory("All");
             }}
             className="mt-2 inline-flex items-center justify-center rounded-full bg-[#1F2022] px-6 py-2 text-xs font-bold text-[#FCFAF7]"
           >
-            Reset Filter
+            Reset Filters
           </button>
         </div>
       ) : (
@@ -290,6 +290,7 @@ function CatalogContent() {
     </div>
   );
 }
+
 
 export default function CatalogPage() {
   return (

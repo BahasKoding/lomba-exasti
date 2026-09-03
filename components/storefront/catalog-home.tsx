@@ -101,7 +101,7 @@ export function CatalogHome() {
   const handleAddToCart = (e: React.MouseEvent, productName: string) => {
     e.preventDefault();
     e.stopPropagation();
-    alert(`"${productName}" telah ditambahkan ke Keranjang (Cart)!`);
+    alert(`"${productName}" has been added to your Cart!`);
   };
 
   return (
