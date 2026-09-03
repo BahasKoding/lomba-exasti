@@ -61,10 +61,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Settings className="h-4 w-4" />
                     Pengaturan
                   </Link>
-                  <Link href="/login" className="flex items-center gap-2 rounded-lg px-3 py-2 text-red-500 hover:bg-red-50 hover:text-red-600 mt-4">
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/auth/logout", { method: "POST" });
+                      window.location.href = "/login";
+                    }}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-red-500 hover:bg-red-50 hover:text-red-600 mt-4 w-full"
+                  >
                     <LogOut className="h-4 w-4" />
                     Logout
-                  </Link>
+                  </button>
                 </nav>
               </SheetContent>
             </Sheet>

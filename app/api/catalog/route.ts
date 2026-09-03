@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { productsTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
-        const catalog = await db.select().from(productsTable);
+        const catalog = await db
+            .select()
+            .from(productsTable)
+            .where(eq(productsTable.status, "published"));
+
 
         return NextResponse.json({
             success: true,

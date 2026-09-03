@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, CheckCircle, AlertCircle, Loader } from "lucide-react";
+import { UploadCloud, CheckCircle, AlertCircle, Loader, RefreshCw } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+
+const formatRupiah = (n: number) =>
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+
 
 async function fileToItem(file: File) {
   const imageBase64 = await new Promise<string>((resolve, reject) => {
@@ -25,6 +31,55 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [progressMessage, setProgressMessage] = useState<string | null>(null);
 
+  // --- Preview table state ---
+  const [products, setProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "parked" | "published">("all");
+
+  // produk yang tampil sesuai tab filter aktif
+  const filteredProducts =
+    statusFilter === "all" ? products : products.filter((p) => p.status === statusFilter);
+
+  // muat daftar produk saat halaman dibuka
+  useEffect(() => {
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((d) => setProducts(d.success ? d.data : []))
+      .catch(() => setProducts([]))
+      .finally(() => setLoadingProducts(false));
+  }, []);
+
+  async function loadProducts() {
+    setLoadingProducts(true);
+    try {
+      const r = await fetch("/api/products");
+      const d = await r.json();
+      if (d.success) setProducts(d.data);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }
+
+  // toggle park <-> publish
+  async function toggleStatus(product: any) {
+    const newStatus = product.status === "published" ? "parked" : "published";
+    setTogglingId(product.id);
+    try {
+      const res = await fetch("/api/products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: product.id, status: newStatus }),
+      });
+      if (res.ok) {
+        // update baris ini saja di state — tanpa reload seluruh tabel
+        setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, status: newStatus } : p)));
+      }
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
   const handleSubmit = async () => {
     if (!selectedFiles.length) {
       setError("Silakan pilih minimal satu file gambar terlebih dahulu.");
@@ -39,7 +94,7 @@ export default function AdminDashboard() {
       const items = await Promise.all(selectedFiles.map(fileToItem));
 
       setProgressMessage("AI Gemini sedang menganalisis foto... (±10 detik per foto)");
-      
+
       const response = await fetch("/api/ingest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,6 +114,7 @@ export default function AdminDashboard() {
     }
   };
 
+  // Upload Card
   return (
     <div className="min-h-screen space-y-6 bg-[#FCFAF7] p-6 md:p-8">
       <div className="mx-auto max-w-4xl space-y-6">
@@ -108,7 +164,7 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-[#1F2022]">Area Unggah</h2>
               <p className="mt-2 text-sm text-[#94908C]">
-                Pilih atau drag & drop gambar produk topi ke sini (JPG, PNG, WEBP — maks 5MB per file).
+                Pilih atau drag & drop gambar produk topi ke sini (JPG, PNG, WEBP — maks 10Mb per file).
               </p>
             </div>
 
@@ -141,7 +197,7 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-bold text-[#1F2022]">Tarik & Lepas Gambar</h3>
                     <p className="mt-1 text-sm text-[#94908C]">atau klik untuk memilih dari komputer Anda</p>
                   </div>
-                  <p className="text-xs text-[#94908C]">JPG, PNG, WEBP hingga 5MB per file</p>
+                  <p className="text-xs text-[#94908C]">JPG, PNG, WEBP hingga 10Mb per file</p>
                 </div>
               </label>
             </div>
@@ -206,6 +262,126 @@ export default function AdminDashboard() {
                 <li>3. Hasilnya akan tampil di halaman <strong>Review AI</strong> untuk direvisi & disimpan ke database Turso.</li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Product Preview Table */}
+        <div className="overflow-hidden rounded-3xl border border-[#E5E2DC] bg-[#FFFFFF] shadow-xs">
+          <div className="space-y-6 p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-[#1F2022]">Daftar Produk</h2>
+                <p className="mt-2 text-sm text-[#94908C]">
+                  Produk <span className="font-semibold">Parked</span> belum tampil di etalase publik — keputusan publikasi ada di tangan Anda.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadProducts}
+                disabled={loadingProducts}
+                className="gap-2 rounded-full border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7]"
+              >
+                <RefreshCw className={`h-4 w-4 ${loadingProducts ? "animate-spin" : ""}`} />
+                Muat Ulang
+              </Button>
+            </div>
+
+            {/* Status filter tabs */}
+            <div className="flex gap-2">
+              {(["all", "parked", "published"] as const).map((f) => {
+                const count = f === "all" ? products.length : products.filter((p) => p.status === f).length;
+                const active = statusFilter === f;
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setStatusFilter(f)}
+                    className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                      active
+                        ? "bg-[#1F2022] text-[#FCFAF7]"
+                        : "border border-[#E5E2DC] text-[#94908C] hover:border-[#1F2022] hover:text-[#1F2022]"
+                    }`}
+                  >
+                    {f === "all" ? "Semua" : f === "parked" ? "Parked" : "Published"} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {loadingProducts ? (
+              <p className="py-8 text-center text-sm font-semibold text-[#94908C]">Memuat daftar produk...</p>
+            ) : filteredProducts.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[#94908C]">
+                {products.length === 0
+                  ? "Belum ada produk tersimpan. Unggah foto pertama Anda di atas."
+                  : "Tidak ada produk dengan status ini."}
+              </p>
+            ) : (
+              <div className="overflow-x-auto rounded-2xl border border-[#E5E2DC]">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-[#FCFAF7]">
+                      <TableHead className="pl-4">Foto</TableHead>
+                      <TableHead>Nama Produk</TableHead>
+                      <TableHead>Kategori</TableHead>
+                      <TableHead>Harga</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="pr-4 text-right">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="pl-4">
+                          {p.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.imageUrl}
+                              alt={p.name}
+                              className="h-12 w-12 rounded-lg border border-[#E5E2DC] object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#E5E2DC] bg-[#FCFAF7] text-lg">
+                              🧢
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium text-[#1F2022]">{p.name}</TableCell>
+                        <TableCell className="text-[#94908C]">{p.category ?? "-"}</TableCell>
+                        <TableCell className="font-semibold text-[#1F2022]">{formatRupiah(p.price)}</TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              p.status === "published"
+                                ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100"
+                                : "bg-amber-100 text-amber-800 hover:bg-amber-100"
+                            }
+                          >
+                            {p.status === "published" ? "Published" : "Parked"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="pr-4 text-right">
+                          <Button
+                            size="sm"
+                            variant={p.status === "published" ? "outline" : "default"}
+                            disabled={togglingId === p.id}
+                            onClick={() => toggleStatus(p)}
+                            className={
+                              p.status === "published"
+                                ? "rounded-full border-[#E5E2DC] text-[#1F2022] hover:bg-red-50 hover:text-red-600"
+                                : "rounded-full bg-[#1F2022] text-[#FCFAF7] hover:bg-[#1F2022]/90"
+                            }
+                          >
+                            {togglingId === p.id ? <Loader className="h-4 w-4 animate-spin" /> : null}
+                            {p.status === "published" ? "Tarik dari Etalase" : "Publikasikan"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
         </div>
       </div>

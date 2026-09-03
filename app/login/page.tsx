@@ -10,11 +10,30 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Dummy login: DB auth is not ready yet, directly navigate to admin dashboard
-    router.push("/admin");
+    setLoading(true);
+    setError("");
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      router.push("/admin");
+    } else {
+      setError(data.error ?? "Login gagal");
+      setLoading(false);
+    }
   };
+
+  { error && <p className="text-sm font-medium text-red-600">{error}</p> }
 
   return (
     <div className="flex min-h-screen w-full bg-[#FCFAF7] font-sans">

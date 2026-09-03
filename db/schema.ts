@@ -6,8 +6,12 @@ export const usersTable = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  passwordHash: text("password_hash").notNull(),
+  sessionToken: text("session_token"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
+
+
 
 // Catalog Tablenya
 export const productsTable = sqliteTable("products", {
@@ -20,24 +24,25 @@ export const productsTable = sqliteTable("products", {
   stockCount: integer("stock_count").default(0),
   category: text("category"),
   material: text("material"),
+  status: text("status").default("parked").notNull(), // "parked" | "published"
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const productVariantsTable = sqliteTable("product_variants", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  productId: text("product_id")
-    .notNull()
-    .references(() => productsTable.id, { onDelete: "cascade" }),
-  sku: text("sku").notNull().unique(),
-  color: text("color").notNull(),
-  sizeOrDiameter: text("size_or_diameter"),
-  stockCount: integer("stock_count").default(0).notNull(),
-});
+// export const productVariantsTable = sqliteTable("product_variants", {
+//   id: integer("id").primaryKey({ autoIncrement: true }),
+//   productId: text("product_id")
+//     .notNull()
+//     .references(() => productsTable.id, { onDelete: "cascade" }),
+//   sku: text("sku").notNull().unique(),
+//   color: text("color").notNull(),
+//   sizeOrDiameter: text("size_or_diameter"),
+//   stockCount: integer("stock_count").default(0).notNull(),
+// });
 
-export const productFeaturesTable = sqliteTable("product_features", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  productId: text("product_id")
-    .notNull()
-    .references(() => productsTable.id, { onDelete: "cascade" }),
-  feature: text("feature").notNull(),
-});
+// export const productFeaturesTable = sqliteTable("product_features", {
+//   id: integer("id").primaryKey({ autoIncrement: true }),
+//   productId: text("product_id")
+//     .notNull()
+//     .references(() => productsTable.id, { onDelete: "cascade" }),
+//   feature: text("feature").notNull(),
+// });
