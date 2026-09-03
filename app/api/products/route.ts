@@ -11,6 +11,8 @@ function slugify(name: string): string {
         .replace(/^-+|-+$/g, "");
 }
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
     let body: {
         products: {
@@ -45,12 +47,12 @@ export async function POST(request: Request) {
                 slug: `${slugify(item.name)}-${id.slice(0, 6)}`,
                 category: item.category,
                 material: item.material,
-                AI_description: item.description,
+                aiDescription: item.description,
                 price: item.price,
                 imageUrl: item.imageBase64
                     ? `data:${item.mimeType ?? "image/jpeg"};base64,${item.imageBase64}`
                     : null,
-                stock_count: 1,
+                stockCount: 1,
             };
         });
 

@@ -24,6 +24,8 @@ async function mapWithConcurrency<T, R>(
 const MAX_ITEMS = 30;
 const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10MB
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
     // Guardrail 1: reject oversized payloads before parsing
     const contentLength = Number(request.headers.get("content-length") ?? 0);
@@ -69,5 +71,5 @@ export async function POST(request: Request) {
         }
     });
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ success: true, results });
 }
