@@ -108,8 +108,34 @@ export async function POST(request: Request) {
     } catch (err: any) {
         console.error("Insert error:", err);
         return NextResponse.json(
-            { success: false, error: err?.message ?? "Gagal menyimpan produk." },
+            { success: false, error: err?.message ?? "Failed to save product." },
             { status: 500 },
         );
     }
 }
+
+
+export async function DELETE(request: Request) {
+    let body: { id?: string };
+    try {
+        body = await request.json();
+    } catch {
+        return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    }
+
+    const { id } = body;
+    if (!id) {
+        return NextResponse.json({ error: "Product 'id' is required." }, { status: 400 });
+    }
+
+    try {
+        const deleted = await db.delete(productsTable).where(eq(productsTable.id, id)).returning();
+        if (deleted.length === 0) {
+            return NextResponse.json({ error: "Product not found." }, { status: 404 });
+        }
+        return NextResponse.json({ success: true, data: deleted[0] });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message ?? "Failed to delete product." }, { status: 500 });
+    }
+}
+
