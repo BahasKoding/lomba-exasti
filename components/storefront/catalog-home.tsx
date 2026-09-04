@@ -1,3 +1,4 @@
+// SmartCap Storefront Catalog Home UI
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
