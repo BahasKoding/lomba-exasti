@@ -1,0 +1,48 @@
+Test Case ID	Module	Feature	Title	Preconditions	Steps	Expected Result	Priority	Type	Automation	Notes
+AUTH-001	Auth	Login	Login berhasil	Akun admin test valid; DB QA	1. Buka /login\n2. Isi credential valid\n3. Submit	Masuk /admin dan sesi dibuat	P0	Positive	Candidate	Verifikasi sc_session HTTP-only
+AUTH-002	Auth	Login	Credential salah	Akun admin test tersedia	1. Buka /login\n2. Isi password salah\n3. Submit	API 401 dan error generik tampil	P0	Negative	Candidate	Jangan bedakan email/password
+AUTH-003	Auth	Guard route	Direct admin ditolak	Tanpa cookie sesi	1. Buka /admin langsung\n2. Amati redirect	Redirect ke /login?from=/admin	P0	Negative	Candidate	Middleware
+AUTH-004	Auth	Guard route	Cookie palsu ditolak	Cookie sc_session acak	1. Set cookie acak di environment QA\n2. Buka /admin	Akses ditolak	P0	Negative	Candidate	Expected NEEDS CONFIRMATION; risk code
+AUTH-005	Auth	Logout	Logout revoke sesi	Login valid	1. Logout\n2. Gunakan browser back\n3. Refresh /admin	Sesi tidak dapat mengakses admin	P0	Positive	Candidate	Cek cookie dan DB
+AUTH-API-001	Auth	API guard	Products tanpa sesi	Tanpa sesi	1. GET /api/products tanpa cookie	API menolak akses	P0	Negative	Candidate	Expected NEEDS CONFIRMATION
+AUTH-API-002	Auth	API guard	Ingest tanpa sesi	Tanpa sesi; payload valid dummy	1. POST /api/ingest tanpa cookie	API menolak sebelum call AI	P0	Negative	Candidate	Mencegah biaya tanpa izin
+AUTH-API-003	Auth	Login payload	JSON login invalid	Server hidup	1. POST teks invalid ke /api/auth/login	API return 400 terstruktur	P1	Negative	Candidate	Saat ini kemungkinan 500
+API-CAT-001	Catalog	Published list	Hanya published	DB QA berisi parked dan published	1. GET /api/catalog	Hanya published dikembalikan	P0	Positive	Candidate	Verifikasi schema
+FE-CAT-001	Catalog	Browse	Cari dan urutkan	Katalog ≥3 produk	1. Buka /katalog\n2. Cari nama/material\n3. Ubah sort	Hasil sesuai query dan urutan	P1	Positive	Candidate	Data test deterministik
+FE-CAT-002	Catalog	Error state	API catalog gagal	Stub API 500	1. Buka /katalog\n2. Tunggu load	Error state sesuai requirement	P1	Negative	Candidate	Saat ini fallback; expected NEEDS CONFIRMATION
+FE-DETAIL-001	Product	Invalid slug	Slug tidak ada	Server hidup	1. Buka /produk/slug-tidak-ada	Not found sesuai requirement	P1	Negative	Candidate	Saat ini produk default; expected NEEDS CONFIRMATION
+FE-CART-001	Cart	Cart journey	Add dan hitung total	Produk published tersedia	1. Add product\n2. Buka /cart\n3. Tambah qty	Item persist dan total benar	P0	Positive	Candidate	Cek refresh
+FE-CART-002	Cart	Empty state	Cart kosong persist	localStorage cart=[]	1. Buka /cart\n2. Refresh	Empty state tetap tampil	P1	Edge	Candidate	Saat ini sample cart
+API-ING-001	Ingest	Batch valid	Satu gambar berhasil	AI stub valid; sesi admin	1. POST satu item valid	Result index 0 ok dan schema draft valid	P0	Positive	Candidate	Live AI dipisah
+API-ING-002	Ingest	Batch max	Maksimal 30 item	AI stub; sesi admin	1. POST 30 item valid	Request diterima dan 30 result	P1	Edge	Candidate	Concurrency 4
+API-ING-003	Ingest	Batch over max	Tolak 31 item	Sesi admin	1. POST 31 item valid	API return 400 tanpa call AI	P1	Edge	Candidate	-
+API-ING-004	Ingest	Item invalid	Base64 invalid	Sesi admin	1. POST imageBase64 invalid	API menolak sebelum call AI	P1	Negative	Candidate	Validasi saat ini hanya truthy
+API-PROD-001	Products	Create	Simpan parked	Sesi admin; product valid	1. POST product valid\n2. GET /api/products	201 dan row status parked persist	P0	Positive	Candidate	Unique prefix
+API-PROD-002	Products	Create validation	Harga negatif ditolak	Sesi admin	1. POST product price=-1	API return 400 dan DB tidak berubah	P0	Negative	Candidate	Expected NEEDS CONFIRMATION
+API-PROD-003	Products	Publish	Publish berhasil	Row parked milik suite	1. PATCH status published\n2. GET catalog	Status persist dan tampil publik	P0	Positive	Candidate	State transition
+API-PROD-004	Products	Publish validation	Status invalid	Row test tersedia	1. PATCH status=approved	API return 400 dan state tetap	P1	Negative	Candidate	-
+API-PROD-005	Products	Delete	ID tidak ada	Sesi admin	1. DELETE ID random	API return 404	P1	Negative	Candidate	-
+API-PROD-006	Products	Repeated request	Publish berulang	Row parked tersedia	1. Kirim PATCH published dua kali	Hasil idempotent atau behavior terdokumentasi	P2	Edge	Candidate	Expected NEEDS CONFIRMATION
+ADMIN-REV-001	Review	Selection	Selected rejected mapping	Draft campuran; pilih index setelah rejected	1. Reject row awal\n2. Pilih row setelahnya\n3. Save	Hanya row terpilih disimpan	P0	Edge	Candidate	Risk index mapping
+FE-SET-001	Settings	Persistence	Setting tersimpan	Login valid	1. Ubah nomor/branding\n2. Save\n3. Buka storefront	Nilai tampil dan persist setelah refresh	P1	Positive	Candidate	Per browser
+E2E-ADMIN-001	Journey	Ingest publish	Produk sampai katalog	DB QA; admin; AI stub	1. Login\n2. Ingest image\n3. Approve/save\n4. Publish\n5. Buka katalog	Produk persist dan tampil publik	P0	Positive	Candidate	Critical journey
+SMOKE-001	Smoke	App availability	Halaman utama tersedia	Local dev server aktif	1. GET /\n2. GET /katalog	Kedua halaman return 200 HTML	P0	Positive	Candidate	HTTP smoke; UI interaction terpisah
+AUTH-006	Auth	Login validation	Login kosong ditolak	Server aktif	1. POST email dan password kosong	API return 400 dengan error wajib diisi	P0	Negative	Candidate	Backend validation
+AUTH-007	Auth	Logout edge	Logout tanpa sesi	Tanpa cookie sesi	1. POST /api/auth/logout	API sukses dan memastikan cookie terhapus	P1	Edge	Candidate	Idempotent logout
+AUTH-API-004	Auth	API guard	Review tanpa sesi	Tanpa sesi	1. GET /api/admin/review	API menolak akses	P0	Negative	Candidate	Expected admin-only NEEDS CONFIRMATION
+API-PROD-007	Products	Create validation	Array kosong ditolak	Server aktif	1. POST products=[]	API return 400 dan DB tidak berubah	P1	Negative	Candidate	Tidak mencapai insert
+API-PROD-008	Products	Delete validation	ID kosong ditolak	Server aktif	1. DELETE tanpa id	API return 400 dan DB tidak berubah	P1	Negative	Candidate	Tidak mencapai delete
+API-PROD-009	Products	Item validation	Item kosong ditolak	Server aktif	1. POST products berisi object kosong	API return 400 terstruktur dan DB tidak berubah	P0	Negative	Candidate	Tidak boleh expose exception
+API-PROD-010	Products	Publish not found	ID publish tidak ada	Server aktif	1. PATCH ID unik tidak ada ke published	API return 404 dan DB tidak berubah	P1	Negative	Candidate	ID random isolated
+API-ING-005	Ingest	Batch validation	Array kosong ditolak	Server aktif	1. POST items=[]	API return 400 tanpa call AI	P1	Negative	Candidate	-
+API-REV-001	Review	Payload validation	ID review kosong	Server aktif	1. PATCH review tanpa id	API return 400	P1	Negative	Candidate	-
+API-UPLOAD-001	Upload	Payload validation	Upload tanpa file	Server aktif	1. POST multipart tanpa files	API return 400	P1	Negative	Candidate	-
+FE-HOME-001	Storefront	Landing/navigation	Homepage dan CTA katalog	Server aktif	1. Buka /\n2. Verifikasi hero\n3. Buka katalog	Hero dan CTA katalog tampil serta dapat dinavigasi	P0	Positive	Candidate	Browser UI
+FE-DETAIL-002	Product	Card-detail mapping	Card membuka detail produk yang sama	Katalog API tersedia	1. Buka card katalog\n2. Klik produk\n3. Tunggu fetch selesai	Nama detail akhirnya sama dengan card; loading tidak menampilkan produk lain	P0	Positive	Candidate	Periksa stale fallback selama loading
+FE-CART-003	Cart	Duplicate add	Tambah produk identik dua kali	Cart kosong	1. Klik Add pada produk sama dua kali\n2. Buka cart	Satu line item dengan kuantitas 2 dan key unik	P0	Edge	Candidate	Regression-prone state transition
+AUTH-008	Auth	Logout/browser history	Protected content setelah logout	Sesi admin aktif	1. Logout\n2. Browser back\n3. Reload	Konten admin tidak terlihat lagi pada setiap langkah	P0	Negative	Candidate	Pisahkan bfcache dari server guard
+ADMIN-DIR-001	Products	Directory filter	Filter status dan refresh directory	Akses admin; API products tersedia	1. Buka /admin\n2. Filter Parked/Published/All\n3. Refresh	Jumlah row sesuai status dan GET sukses	P0	Positive	Candidate	Read-only
+ADMIN-UPLOAD-001	Ingest	File input validation	Non-image ditolak sebelum generate	Akses admin	1. Pilih file text melalui input\n2. Periksa preview dan tombol Generate	File ditolak dan Generate tetap disabled	P0	Negative	Candidate	Tidak menjalankan AI
+ADMIN-REV-002	Review	Search/filter/view	Cari draft dan ubah mode tampilan	Draft review tersedia	1. Cari nama\n2. Filter status\n3. Ubah Grid/Table	Hanya draft sesuai query/status tampil dan mode aktif berubah	P1	Positive	Candidate	Read-only
+FE-MOBILE-001	Navigation	Public mobile menu	Menu publik responsif	Viewport 390x844	1. Buka menu\n2. Verifikasi link\n3. Klik Catalog	Drawer tampil dan navigasi berhasil	P1	Positive	Candidate	-
+FE-MOBILE-002	Navigation	Admin mobile menu	Menu admin responsif	Akses admin; viewport 390x844	1. Buka menu\n2. Verifikasi menu admin dan logout	Drawer dan seluruh action tampil	P1	Positive	Candidate	Isolated rerun mengalami admin hydration/loading issue
