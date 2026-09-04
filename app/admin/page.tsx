@@ -190,9 +190,9 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Main Container Wireframe Card */}
-      <div className="relative overflow-visible rounded-3xl border border-[#E5E2DC] bg-[#D8D4CD]/30 p-6 md:p-10 shadow-xs">
-        {/* Circled 'i' Info Icon (Top Right) */}
+      {/* Main Container Wireframe Card (Strictly 0 Corner Radius: rounded-none) */}
+      <div className="relative overflow-visible rounded-none border border-[#E5E2DC] bg-[#D8D4CD]/30 p-6 md:p-10 shadow-xs">
+        {/* Info Icon (Top Right) */}
         <div className="absolute right-6 top-6 z-20">
           <div
             className="relative"
@@ -202,15 +202,15 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setShowInfoPopup((prev) => !prev)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#1F2022]/30 bg-white text-[#1F2022] transition-all duration-200 hover:scale-105 hover:border-[#1F2022] hover:bg-[#1F2022] hover:text-[#FCFAF7] shadow-2xs cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-none border border-[#1F2022]/30 bg-white text-[#1F2022] transition-all duration-200 hover:border-[#1F2022] hover:bg-[#1F2022] hover:text-[#FCFAF7] shadow-2xs cursor-pointer"
               title="Workflow Information"
             >
               <Info className="h-5 w-5" />
             </button>
 
-            {/* Floating Pop-up: "How It Works" */}
+            {/* Floating Pop-up: "How It Works" (Strictly 0 Corner Radius: rounded-none) */}
             {showInfoPopup && (
-              <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-[#E5E2DC] bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-none border border-[#E5E2DC] bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
                 <div className="space-y-4">
                   <div className="text-center">
                     <h3 className="text-base font-extrabold text-[#1F2022]">How It Works</h3>
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Drag & Drop Upload Zone */}
+        {/* Drag & Drop Upload Zone (Strictly 0 Corner Radius: rounded-none) */}
         <div className="mx-auto max-w-xl">
           <div className="relative group">
             <input
@@ -261,10 +261,10 @@ export default function AdminDashboard() {
             />
             <label
               htmlFor="bulk-image-input"
-              className="flex min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#1F2022]/40 bg-white p-8 text-center transition-all duration-300 group-hover:border-[#1F2022] group-hover:bg-[#FCFAF7] shadow-2xs"
+              className="flex min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-none border-2 border-dashed border-[#1F2022]/40 bg-white p-8 text-center transition-all duration-300 group-hover:border-[#1F2022] group-hover:bg-[#FCFAF7] shadow-2xs"
             >
               <div className="flex flex-col items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FCFAF7] border border-[#E5E2DC] text-[#1F2022] group-hover:scale-110 transition-transform">
+                <div className="flex h-14 w-14 items-center justify-center rounded-none bg-[#FCFAF7] border border-[#E5E2DC] text-[#1F2022] transition-transform">
                   <UploadCloud className="h-7 w-7" />
                 </div>
                 <div>
@@ -284,19 +284,19 @@ export default function AdminDashboard() {
             {selectedFiles.length} File{selectedFiles.length !== 1 && "s"}
           </p>
 
-          {/* Uploaded Thumbnails + "More" Box */}
+          {/* Uploaded Thumbnails + "More" Box (Strictly 0 Corner Radius: rounded-none) */}
           {selectedFiles.length > 0 && (
             <div className="flex flex-wrap items-center justify-center gap-3 max-w-2xl">
               {previewUrls.slice(0, 5).map((url, idx) => (
                 <div
                   key={idx}
-                  className="relative group h-16 w-16 overflow-hidden rounded-xl border border-[#E5E2DC] bg-white shadow-2xs"
+                  className="relative group h-16 w-16 overflow-hidden rounded-none border border-[#E5E2DC] bg-white shadow-2xs"
                 >
                   <img src={url} alt={`Preview ${idx + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveDirect(idx)}
-                    className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-none bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                     title="Remove image"
                   >
                     <X className="h-2.5 w-2.5" />
@@ -304,25 +304,27 @@ export default function AdminDashboard() {
                 </div>
               ))}
 
-              {/* "More" Square Card */}
-              <button
-                type="button"
-                onClick={openModal}
-                className="flex h-16 w-20 flex-col items-center justify-center rounded-xl border border-[#1F2022] bg-white px-2 text-xs font-black text-[#1F2022] hover:bg-[#1F2022] hover:text-white transition-colors duration-200 shadow-2xs cursor-pointer"
-              >
-                <span>More</span>
-                <span className="text-[10px] font-normal text-[#94908C]">({selectedFiles.length})</span>
-              </button>
+              {/* "More" Square Card (Strictly 0 Corner Radius: Appears ONLY when > 5 files) */}
+              {selectedFiles.length > 5 && (
+                <button
+                  type="button"
+                  onClick={openModal}
+                  className="flex h-16 w-20 flex-col items-center justify-center rounded-none border border-[#1F2022] bg-white px-2 text-xs font-black text-[#1F2022] hover:bg-[#1F2022] hover:text-white transition-colors duration-200 shadow-2xs cursor-pointer"
+                >
+                  <span>More</span>
+                  <span className="text-[10px] font-normal text-[#94908C]">({selectedFiles.length})</span>
+                </button>
+              )}
             </div>
           )}
 
-          {/* Action Generate Button */}
+          {/* Action Generate Button (Strictly 0 Corner Radius: rounded-none) */}
           <div className="mt-2">
             <Button
               onClick={handleSubmit}
               disabled={isUploading || selectedFiles.length === 0}
               size="lg"
-              className="h-11 min-w-[200px] rounded-xl bg-[#707070] px-8 text-sm font-bold text-white transition-all hover:bg-[#1F2022] disabled:opacity-50 cursor-pointer"
+              className="h-11 min-w-[200px] rounded-none bg-[#707070] px-8 text-sm font-bold text-white transition-all hover:bg-[#1F2022] disabled:opacity-50 cursor-pointer"
             >
               {isUploading ? (
                 <div className="flex items-center gap-2">
@@ -335,16 +337,16 @@ export default function AdminDashboard() {
             </Button>
           </div>
 
-          {/* Progress / Error Alerts */}
+          {/* Progress / Error Alerts (Strictly 0 Corner Radius: rounded-none) */}
           {isUploading && progressMessage && (
-            <div className="mt-4 flex items-center gap-3 rounded-xl border border-[#E5E2DC] bg-white p-3.5 text-xs font-semibold text-[#1F2022]">
+            <div className="mt-4 flex items-center gap-3 rounded-none border border-[#E5E2DC] bg-white p-3.5 text-xs font-semibold text-[#1F2022]">
               <Loader className="h-4 w-4 animate-spin text-[#1F2022]" />
               <span>{progressMessage}</span>
             </div>
           )}
 
           {error && (
-            <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-bold text-red-600">
+            <div className="mt-4 flex items-center gap-2.5 rounded-none border border-red-200 bg-red-50 p-3.5 text-xs font-bold text-red-600">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -352,8 +354,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Product Directory Table */}
-      <div className="overflow-hidden rounded-3xl border border-[#E5E2DC] bg-[#FFFFFF] shadow-xs">
+      {/* Product Directory Table (Strictly 0 Corner Radius: rounded-none) */}
+      <div className="overflow-hidden rounded-none border border-[#E5E2DC] bg-[#FFFFFF] shadow-xs">
         <div className="space-y-6 p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -367,14 +369,14 @@ export default function AdminDashboard() {
               size="sm"
               onClick={loadProducts}
               disabled={loadingProducts}
-              className="gap-2 rounded-full border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer text-xs font-bold"
+              className="gap-2 rounded-none border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer text-xs font-bold"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loadingProducts ? "animate-spin" : ""}`} />
               Refresh List
             </Button>
           </div>
 
-          {/* Status filter tabs */}
+          {/* Status filter tabs (Strictly 0 Corner Radius: rounded-none) */}
           <div className="flex gap-2">
             {(["all", "parked", "published"] as const).map((f) => {
               const count = f === "all" ? products.length : products.filter((p) => p.status === f).length;
@@ -383,7 +385,7 @@ export default function AdminDashboard() {
                 <button
                   key={f}
                   onClick={() => setStatusFilter(f)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-bold transition cursor-pointer capitalize ${
+                  className={`rounded-none px-4 py-1.5 text-xs font-bold transition cursor-pointer capitalize ${
                     active
                       ? "bg-[#1F2022] text-[#FCFAF7]"
                       : "border border-[#E5E2DC] text-[#94908C] hover:border-[#1F2022] hover:text-[#1F2022]"
@@ -404,13 +406,12 @@ export default function AdminDashboard() {
                 : "No products found with this status."}
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-[#E5E2DC]">
+            <div className="overflow-x-auto rounded-none border border-[#E5E2DC]">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-[#FCFAF7]">
                     <TableHead className="pl-4 font-bold text-[#1F2022]">Photo</TableHead>
                     <TableHead className="font-bold text-[#1F2022]">Product Name</TableHead>
-                    <TableHead className="font-bold text-[#1F2022]">Category</TableHead>
                     <TableHead className="font-bold text-[#1F2022]">Price</TableHead>
                     <TableHead className="font-bold text-[#1F2022]">Status</TableHead>
                     <TableHead className="pr-4 text-right font-bold text-[#1F2022]">Actions</TableHead>
@@ -424,23 +425,22 @@ export default function AdminDashboard() {
                           <img
                             src={p.imageUrl}
                             alt={p.name}
-                            className="h-12 w-12 rounded-lg border border-[#E5E2DC] object-cover"
+                            className="h-12 w-12 rounded-none border border-[#E5E2DC] object-cover"
                           />
                         ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#E5E2DC] bg-[#FCFAF7] text-lg">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-none border border-[#E5E2DC] bg-[#FCFAF7] text-lg">
                             🧢
                           </div>
                         )}
                       </TableCell>
                       <TableCell className="font-bold text-[#1F2022]">{p.name}</TableCell>
-                      <TableCell className="text-[#94908C] text-xs font-semibold">{p.category ?? "-"}</TableCell>
                       <TableCell className="font-extrabold text-[#1F2022]">{formatRupiah(p.price)}</TableCell>
                       <TableCell>
                         <Badge
                           className={
                             p.status === "published"
-                              ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100 font-bold"
-                              : "bg-amber-100 text-amber-800 hover:bg-amber-100 font-bold"
+                              ? "rounded-none bg-emerald-100 text-emerald-800 hover:bg-emerald-100 font-bold border border-emerald-300"
+                              : "rounded-none bg-amber-100 text-amber-800 hover:bg-amber-100 font-bold border border-amber-300"
                           }
                         >
                           {p.status === "published" ? "Published" : "Parked"}
@@ -448,13 +448,13 @@ export default function AdminDashboard() {
                       </TableCell>
                       <TableCell className="pr-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Publish / Park Toggle Button */}
+                          {/* Publish / Park Toggle Button (Strictly 0 Corner Radius: rounded-none) */}
                           <Button
                             size="sm"
                             variant={p.status === "published" ? "outline" : "default"}
                             disabled={togglingId === p.id || deletingId === p.id}
                             onClick={() => toggleStatus(p)}
-                            className={`rounded-full px-3 text-xs font-bold cursor-pointer gap-1.5 ${
+                            className={`rounded-none px-3 text-xs font-bold cursor-pointer gap-1.5 ${
                               p.status === "published"
                                 ? "border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7]"
                                 : "bg-[#1F2022] text-[#FCFAF7] hover:bg-[#1F2022]/90"
@@ -469,23 +469,6 @@ export default function AdminDashboard() {
                             )}
                             <span>{p.status === "published" ? "Unpublish" : "Publish"}</span>
                           </Button>
-
-                          {/* Delete Button */}
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            disabled={togglingId === p.id || deletingId === p.id}
-                            onClick={() => deleteProduct(p.id)}
-                            className="rounded-full px-3 text-xs font-bold bg-red-600 text-white hover:bg-red-700 cursor-pointer gap-1.5"
-                            title="Delete Product"
-                          >
-                            {deletingId === p.id ? (
-                              <Loader className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                            <span>Delete</span>
-                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -497,23 +480,23 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Pop Up / Modal "Image Uploaded" */}
+      {/* Pop Up / Modal "Image Uploaded" (Strictly 0 Corner Radius: rounded-none) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-[#E5E2DC] bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-3xl overflow-hidden rounded-none border border-[#E5E2DC] bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[#E5E2DC] pb-4">
               <h2 className="text-lg font-bold text-[#1F2022]">Image Uploaded</h2>
               <button
                 type="button"
                 onClick={handleCancelModal}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#1F2022]/70 hover:bg-[#FCFAF7] hover:text-[#1F2022] transition-colors cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-none text-[#1F2022]/70 hover:bg-[#FCFAF7] hover:text-[#1F2022] transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5 font-black" />
               </button>
             </div>
 
-            {/* Modal Content: Scrollable Grid of Uploaded Images */}
+            {/* Modal Content: Scrollable Grid of Uploaded Images (Strictly 0 Corner Radius: rounded-none) */}
             <div className="my-6 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
               {modalFiles.length === 0 ? (
                 <div className="py-12 text-center text-sm font-semibold text-[#94908C]">
@@ -522,18 +505,18 @@ export default function AdminDashboard() {
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 p-2">
                   {modalPreviewUrls.map((url, idx) => (
-                    <div key={idx} className="relative group aspect-square rounded-lg border border-[#E5E2DC] bg-[#FCFAF7] p-1">
+                    <div key={idx} className="relative group aspect-square rounded-none border border-[#E5E2DC] bg-[#FCFAF7] p-1">
                       <img
                         src={url}
                         alt={`Uploaded ${idx + 1}`}
-                        className="h-full w-full rounded-md object-cover"
+                        className="h-full w-full rounded-none object-cover"
                       />
 
-                      {/* Red Circular Badge 'X' Delete Button */}
+                      {/* Red Square Badge 'X' Delete Button */}
                       <button
                         type="button"
                         onClick={() => handleRemoveFromModal(idx)}
-                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white font-extrabold text-xs shadow-md transition-transform hover:scale-110 cursor-pointer"
+                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-none bg-red-600 text-white font-extrabold text-xs shadow-md transition-transform hover:scale-110 cursor-pointer"
                         title="Remove photo"
                       >
                         ✕
@@ -544,12 +527,12 @@ export default function AdminDashboard() {
               )}
             </div>
 
-            {/* Modal Footer Actions */}
+            {/* Modal Footer Actions (Strictly 0 Corner Radius: rounded-none) */}
             <div className="flex items-center justify-center gap-4 border-t border-[#E5E2DC] pt-4">
               <Button
                 type="button"
                 onClick={handleSaveModal}
-                className="h-10 min-w-[120px] rounded-lg bg-[#707070] text-sm font-bold text-white hover:bg-[#1F2022] cursor-pointer"
+                className="h-10 min-w-[120px] rounded-none bg-[#707070] text-sm font-bold text-white hover:bg-[#1F2022] cursor-pointer"
               >
                 Update
               </Button>
@@ -557,7 +540,7 @@ export default function AdminDashboard() {
                 type="button"
                 variant="outline"
                 onClick={handleCancelModal}
-                className="h-10 min-w-[120px] rounded-lg border-[#1F2022]/40 bg-[#707070]/70 text-sm font-bold text-white hover:bg-[#707070] cursor-pointer"
+                className="h-10 min-w-[120px] rounded-none border-[#1F2022]/40 bg-[#707070]/70 text-sm font-bold text-white hover:bg-[#707070] cursor-pointer"
               >
                 Cancel
               </Button>
@@ -568,3 +551,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/", label: "Dashboard" },
     { href: "/katalog", label: "Catalog" },
     { href: "/#about", label: "About" },
-    { href: "/#cart", label: "Cart" },
+    { href: "/cart", label: "Cart" },
   ];
 
   // Sidebar Items: "Massal Upload" removed (redundant with Bulk Massal)
@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="relative mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Left: Brand Logo */}
           <Link href="/admin" className="flex items-center gap-3 group">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#1F2022] text-[#FCFAF7] font-black text-xs uppercase tracking-wider shadow-sm group-hover:scale-105 transition-transform duration-200">
+            <div className="flex h-11 w-11 items-center justify-center rounded-none bg-[#1F2022] text-[#FCFAF7] font-black text-xs uppercase tracking-wider shadow-sm group-hover:scale-105 transition-transform duration-200">
               LOGO
             </div>
           </Link>
@@ -81,9 +81,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/admin"
-              className="relative inline-flex items-center gap-2 rounded-full border border-[#1F2022] bg-[#1F2022] px-4 py-1.5 text-xs font-extrabold tracking-wide text-[#FCFAF7] shadow-xs hover:scale-105 transition-transform"
+              className="relative inline-flex items-center gap-2 rounded-none border border-[#1F2022] bg-[#1F2022] px-4 py-1.5 text-xs font-extrabold tracking-wide text-[#FCFAF7] shadow-xs hover:scale-105 transition-transform"
             >
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="h-2 w-2 rounded-none bg-emerald-400 animate-pulse"></span>
               <span className="underline underline-offset-4 decoration-2 decoration-white/70">Admin</span>
             </Link>
           </div>
@@ -92,9 +92,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3 md:hidden">
             <Link
               href="/admin"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#1F2022] px-3 py-1 text-xs font-bold text-[#FCFAF7]"
+              className="inline-flex items-center gap-1.5 rounded-none bg-[#1F2022] px-3 py-1 text-xs font-bold text-[#FCFAF7]"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+              <span className="h-1.5 w-1.5 rounded-none bg-emerald-400"></span>
               <span>Admin</span>
             </Link>
             <Sheet>
@@ -136,9 +136,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Layout Workspace */}
       <div className="mx-auto flex w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 py-8 gap-10">
-        {/* Left Sidebar */}
+        {/* Left Sidebar (Strictly 0 Corner Radius: rounded-none) */}
         <aside className="hidden w-56 shrink-0 md:block">
-          <div className="sticky top-28 flex flex-col gap-2.5 rounded-2xl border border-[#E5E2DC] bg-[#FCFAF7] p-3 shadow-xs">
+          <div className="sticky top-28 flex flex-col gap-2.5 rounded-none border border-[#E5E2DC] bg-[#FCFAF7] p-3 shadow-xs">
             {sidebarItems.map((item, idx) => {
               const isActive = pathname === item.href;
               
@@ -146,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={idx}
                   href={item.href}
-                  className={`group flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                  className={`group flex items-center rounded-none px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isActive
                       ? "bg-[#D8D4CD] text-[#1F2022] font-black shadow-2xs"
                       : "text-[#1F2022]/80 hover:bg-[#E5E2DC]/40 hover:text-[#1F2022]"
@@ -161,7 +161,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-red-500 transition-colors duration-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
+              className="flex items-center gap-2 rounded-none px-4 py-2.5 text-sm font-bold text-red-500 transition-colors duration-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Logout</span>
