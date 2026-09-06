@@ -41,11 +41,21 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState<"all" | "parked" | "published">("all");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const infoPopupMobileRef = useRef<HTMLDivElement>(null);
+  const infoPopupDesktopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowMobileFilter(false);
+      }
+      if (
+        infoPopupMobileRef.current &&
+        !infoPopupMobileRef.current.contains(event.target as Node) &&
+        infoPopupDesktopRef.current &&
+        !infoPopupDesktopRef.current.contains(event.target as Node)
+      ) {
+        setShowInfoPopup(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -218,7 +228,7 @@ export default function AdminDashboard() {
           
           {/* Info Icon (Mobile Only) */}
           <div className="md:hidden">
-            <div className="relative">
+            <div className="relative" ref={infoPopupMobileRef}>
               <button
                 type="button"
                 onClick={() => setShowInfoPopup((prev) => !prev)}
@@ -272,6 +282,7 @@ export default function AdminDashboard() {
         <div className="hidden md:block absolute right-6 top-6 z-20">
           <div
             className="relative"
+            ref={infoPopupDesktopRef}
             onMouseEnter={() => setShowInfoPopup(true)}
             onMouseLeave={() => setShowInfoPopup(false)}
           >

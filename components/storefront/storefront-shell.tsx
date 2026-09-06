@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { FloatingCartBadge } from "@/components/storefront/floating-cart-badge";
 
 export function StorefrontShell({ children }: { children: React.ReactNode }) {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -199,8 +200,11 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       {children}
 
-      {/* Footer Section */}
-      <footer className="border-t border-[#E5E2DC] bg-transparent">
+      {/* Floating Sticky Shopping Bag Pop Up */}
+      <FloatingCartBadge />
+
+      {/* Footer Section with distinct background boundary */}
+      <footer className="border-t-2 border-[#D5D0C5] bg-[#E5E1D7] shadow-inner">
 
         {/* ── MOBILE FOOTER (< md) — wireframe layout, desktop styling ── */}
         <div className="md:hidden px-5 py-10 space-y-7">

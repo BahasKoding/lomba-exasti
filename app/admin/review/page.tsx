@@ -322,7 +322,7 @@ export default function ReviewPage() {
 
       {/* View Mode Switcher Pill Row (Desktop Only) */}
       <div className="hidden md:flex justify-end py-2">
-        <div className="inline-flex items-center rounded-none border border-[#1F2022] bg-white p-1 shadow-2xs">
+        <div className="inline-flex items-center rounded-none border border-[#DED9CF] bg-white p-1 shadow-2xs">
           <button
             type="button"
             onClick={() => setViewMode("grid")}
@@ -362,7 +362,7 @@ export default function ReviewPage() {
       )}
 
       {/* Main Wireframe Container (Grey Box Card) */}
-      <div className="rounded-none border border-[#E5E2DC] bg-[#D8D4CD]/40 p-5 sm:p-8 space-y-6 shadow-xs">
+      <div className="rounded-none border border-[#DED9CF] bg-[#D8D4CD]/40 p-5 sm:p-8 space-y-6 shadow-xs">
         {/* Top Control Bar & Filter Tabs directly matching wireframe */}
         <div className="space-y-4">
           <div className={`flex gap-3 min-h-[48px] ${selectedIndices.length === 0 ? "items-center flex-row" : "flex-col"}`}>
@@ -370,10 +370,10 @@ export default function ReviewPage() {
             <button
               type="button"
               onClick={toggleSelectAll}
-              className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-none border-2 border-[#1F2022] transition-all cursor-pointer shadow-2xs ${
+              className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-none border border-[#DED9CF] transition-all cursor-pointer shadow-2xs ${
                 isAllSelected
-                  ? "bg-[#1F2022] text-white"
-                  : "bg-white text-transparent hover:bg-[#FCFAF7]"
+                  ? "border-[#353B2D] bg-[#353B2D] text-white"
+                  : "bg-white text-transparent hover:border-[#353B2D]"
               }`}
               title="Select All"
             >
@@ -482,7 +482,7 @@ export default function ReviewPage() {
 
                   {/* Dropdown Popover List */}
                   {isDateDropdownOpen && (
-                    <div className="absolute right-0 top-10 z-50 min-w-[180px] rounded-none border border-[#1F2022] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="absolute right-0 top-10 z-50 min-w-[180px] rounded-none border border-[#DED9CF] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
                       <button
                         type="button"
                         onClick={() => {
@@ -539,7 +539,7 @@ export default function ReviewPage() {
                   </button>
                   
                   {isStatusFilterDropdownOpen && (
-                    <div className="absolute right-0 top-10 z-50 min-w-[120px] rounded-none border border-[#1F2022] bg-white shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                    <div className="absolute right-0 top-10 z-50 min-w-[120px] rounded-none border border-[#DED9CF] bg-white shadow-xl animate-in fade-in zoom-in-95 duration-150">
                       {(["Pending", "Approved", "Rejected"] as ReviewStatus[]).map((st) => (
                         <button
                           key={st}
@@ -590,23 +590,23 @@ export default function ReviewPage() {
                        <button
                           type="button"
                           onClick={() => toggleSelect(realIndex)}
-                          className={`flex h-5 w-5 items-center justify-center rounded-none border border-[#1F2022] transition-all cursor-pointer ${
+                          className={`flex h-5 w-5 items-center justify-center rounded-none border transition-all cursor-pointer ${
                             isChecked
-                              ? "bg-[#1F2022] text-white"
-                              : "bg-white text-transparent hover:bg-[#FCFAF7]"
+                              ? "border-[#353B2D] bg-[#353B2D] text-white"
+                              : "border-[#DED9CF] bg-white text-transparent hover:border-[#353B2D]"
                           }`}
                         >
                           <Check className="h-3 w-3 stroke-[3]" />
                         </button>
                     </div>
 
-                    <div className={`flex flex-col rounded-none bg-white p-3 pt-5 border border-[#1F2022] ${
-                      isChecked ? "shadow-sm ring-1 ring-[#1F2022]/10" : ""
+                    <div className={`flex flex-col rounded-none bg-white p-3 pt-5 border transition-all ${
+                      isChecked ? "border-[#353B2D] shadow-xs" : "border-[#DED9CF]"
                     }`}>
                       {/* Top Section: Photo + Info Fields */}
                       <div className="flex gap-3 relative">
                          {/* Photo Box */}
-                         <div className="relative h-[90px] w-[80px] shrink-0 bg-[#94908C]">
+                         <div className="relative h-[90px] w-[80px] shrink-0 bg-[#94908C] overflow-hidden rounded-none border border-[#DED9CF]">
                            {imgSrc ? (
                              <img src={imgSrc} alt={row.name} className="h-full w-full object-cover" />
                            ) : null}
@@ -623,15 +623,15 @@ export default function ReviewPage() {
                                    type="text"
                                    value={row.name}
                                    onChange={(e) => updateRow(realIndex, "name", e.target.value)}
-                                   className="w-full border-b border-[#1F2022] bg-transparent pb-0.5 pr-4 text-[10px] font-bold text-[#1F2022] outline-none"
+                                   className="w-full border-b border-[#DED9CF] bg-transparent pb-0.5 pr-4 text-[10px] font-bold text-[#1F2022] outline-none focus:border-[#353B2D]"
                                  />
-                                 <Pencil className="absolute right-0 bottom-1 h-2.5 w-2.5 text-[#1F2022]/60" />
+                                 <Pencil className="absolute right-0 bottom-1 h-2.5 w-2.5 text-[#1F2022]/40" />
                                </div>
                              </div>
                              {/* Price */}
                              <div className="flex-1 space-y-0.5 min-w-[70px]">
                                <label className="block text-[9px] font-bold text-[#1F2022]">Price</label>
-                               <div className="flex items-center gap-1 border-b border-[#1F2022] pb-0.5">
+                               <div className="flex items-center gap-1 border-b border-[#DED9CF] pb-0.5 focus-within:border-[#353B2D]">
                                  <span className="text-[10px] font-bold text-[#1F2022]">Rp.</span>
                                  <input
                                    type="number"
@@ -664,7 +664,7 @@ export default function ReviewPage() {
                                 </button>
                                 
                                 {openStatusIndex === realIndex && (
-                                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[100px] rounded-none border border-[#1F2022] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
+                                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[100px] rounded-none border border-[#DED9CF] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
                                     {(["Pending", "Approved", "Rejected"] as ReviewStatus[]).map((statusOption) => (
                                       <button
                                         key={statusOption}
@@ -700,7 +700,7 @@ export default function ReviewPage() {
                           value={row.description}
                           onChange={(e) => updateRow(realIndex, "description", e.target.value)}
                           rows={3}
-                          className="w-full rounded-none border border-[#1F2022] bg-white p-2 text-[10px] text-[#1F2022] leading-relaxed outline-none focus:ring-1 focus:ring-[#1F2022] resize-none font-normal"
+                          className="w-full rounded-none border border-[#DED9CF] bg-white p-2 text-[10px] text-[#1F2022] leading-relaxed outline-none focus:border-[#353B2D] resize-none font-normal"
                         />
                       </div>
                     </div>
@@ -722,8 +722,8 @@ export default function ReviewPage() {
               return (
                 <div
                   key={realIndex}
-                  className={`relative flex flex-col overflow-hidden rounded-none border bg-white p-6 shadow-2xs transition-all space-y-4 ${
-                    isChecked ? "border-[#1F2022] ring-2 ring-[#1F2022]/20" : "border-[#E5E2DC]"
+                  className={`relative flex flex-col overflow-hidden rounded-none border bg-white p-6 transition-all space-y-4 ${
+                    isChecked ? "border-[#353B2D] shadow-xs" : "border-[#DED9CF]"
                   }`}
                 >
                   {/* Top-Left Square Checkbox & Status Selector */}
@@ -731,10 +731,10 @@ export default function ReviewPage() {
                     <button
                       type="button"
                       onClick={() => toggleSelect(realIndex)}
-                      className={`flex h-4 w-4 items-center justify-center rounded-none border-2 transition-all cursor-pointer shadow-2xs ${
+                      className={`flex h-4 w-4 items-center justify-center rounded-none border transition-all cursor-pointer ${
                         isChecked
-                          ? "border-[#1F2022] bg-[#1F2022] text-white"
-                          : "border-[#1F2022]/40 bg-white text-transparent hover:border-[#1F2022]"
+                          ? "border-[#353B2D] bg-[#353B2D] text-white"
+                          : "border-[#DED9CF] bg-white text-transparent hover:border-[#353B2D]"
                       }`}
                       title="Select item"
                     >
@@ -759,7 +759,7 @@ export default function ReviewPage() {
                       </button>
 
                       {openStatusIndex === realIndex && (
-                        <div className="absolute right-0 top-full mt-1 z-50 min-w-[130px] rounded-none border border-[#1F2022] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
+                        <div className="absolute right-0 top-full mt-1 z-50 min-w-[130px] rounded-none border border-[#DED9CF] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
                           {(["Pending", "Approved", "Rejected"] as ReviewStatus[]).map((statusOption) => (
                             <button
                               key={statusOption}
@@ -815,7 +815,7 @@ export default function ReviewPage() {
                           type="text"
                           value={row.name}
                           onChange={(e) => updateRow(realIndex, "name", e.target.value)}
-                          className="w-full border-b border-[#1F2022] bg-transparent pb-1 pr-6 text-xs font-bold text-[#1F2022] outline-none focus:border-b-2"
+                          className="w-full border-b border-[#DED9CF] bg-transparent pb-1 pr-6 text-xs font-bold text-[#1F2022] outline-none focus:border-[#353B2D]"
                         />
                         <Pencil className="pointer-events-none absolute right-0 bottom-1.5 h-3.5 w-3.5 text-[#1F2022]/60" />
                       </div>
@@ -824,7 +824,7 @@ export default function ReviewPage() {
                     {/* Price Field */}
                     <div className="space-y-1">
                       <label className="block text-[11px] font-bold text-[#1F2022]">Price</label>
-                      <div className="flex items-center gap-1 border-b border-[#1F2022] pb-1">
+                      <div className="flex items-center gap-1 border-b border-[#DED9CF] pb-1 focus-within:border-[#353B2D]">
                         <span className="text-xs font-bold text-[#1F2022]">Rp.</span>
                         <input
                           type="number"
@@ -843,7 +843,7 @@ export default function ReviewPage() {
                       value={row.description}
                       onChange={(e) => updateRow(realIndex, "description", e.target.value)}
                       rows={4}
-                      className="w-full rounded-none border border-[#1F2022] bg-white p-3.5 text-xs text-[#1F2022] leading-relaxed outline-none focus:ring-1 focus:ring-[#1F2022] resize-y font-normal"
+                      className="w-full rounded-none border border-[#DED9CF] bg-white p-3.5 text-xs text-[#1F2022] leading-relaxed outline-none focus:border-[#353B2D] resize-y font-normal"
                       placeholder="AI generated description..."
                     />
                   </div>
@@ -866,10 +866,10 @@ export default function ReviewPage() {
                   <button
                     type="button"
                     onClick={() => toggleSelect(realIndex)}
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-none border-2 transition-all cursor-pointer shadow-2xs ${
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-none border transition-all cursor-pointer ${
                       isChecked
-                        ? "border-[#1F2022] bg-[#1F2022] text-white"
-                        : "border-[#1F2022]/40 bg-white text-transparent hover:border-[#1F2022]"
+                        ? "border-[#353B2D] bg-[#353B2D] text-white"
+                        : "border-[#DED9CF] bg-white text-transparent hover:border-[#353B2D]"
                     }`}
                     title="Select item"
                   >
@@ -878,12 +878,12 @@ export default function ReviewPage() {
 
                   {/* Main Horizontal Card Container (Strictly 0 Corner Radius: rounded-none) */}
                   <div
-                    className={`flex flex-col md:flex-row items-stretch gap-6 flex-1 rounded-none border bg-white p-6 shadow-2xs transition-all ${
-                      isChecked ? "border-[#1F2022] ring-2 ring-[#1F2022]/20" : "border-[#E5E2DC]"
+                    className={`flex flex-col md:flex-row items-stretch gap-6 flex-1 rounded-none border bg-white p-6 transition-all ${
+                      isChecked ? "border-[#353B2D] shadow-xs" : "border-[#DED9CF]"
                     }`}
                   >
                     {/* Left Square Thumbnail */}
-                    <div className="relative group h-28 w-28 shrink-0 overflow-hidden rounded-none border border-[#E5E2DC] bg-[#F5F2ED] flex items-center justify-center">
+                    <div className="relative group h-28 w-28 shrink-0 overflow-hidden rounded-none border border-[#DED9CF] bg-[#F5F2ED] flex items-center justify-center">
                       {imgSrc ? (
                         <>
                           <img src={imgSrc} alt={row.name} className="h-full w-full object-cover" />
@@ -910,7 +910,7 @@ export default function ReviewPage() {
                             type="text"
                             value={row.name}
                             onChange={(e) => updateRow(realIndex, "name", e.target.value)}
-                            className="w-full border-b border-[#1F2022] bg-transparent pb-1 pr-6 text-xs font-bold text-[#1F2022] outline-none focus:border-b-2"
+                            className="w-full border-b border-[#DED9CF] bg-transparent pb-1 pr-6 text-xs font-bold text-[#1F2022] outline-none focus:border-[#353B2D]"
                           />
                           <Pencil className="pointer-events-none absolute right-0 bottom-1.5 h-3.5 w-3.5 text-[#1F2022]/60" />
                         </div>
@@ -919,7 +919,7 @@ export default function ReviewPage() {
                       {/* Price */}
                       <div className="space-y-1">
                         <label className="block text-[11px] font-bold text-[#1F2022]">Price</label>
-                        <div className="flex items-center gap-1 border-b border-[#1F2022] pb-1">
+                        <div className="flex items-center gap-1 border-b border-[#DED9CF] pb-1 focus-within:border-[#353B2D]">
                           <span className="text-xs font-bold text-[#1F2022]">Rp.</span>
                           <input
                             type="number"
@@ -954,7 +954,7 @@ export default function ReviewPage() {
                           </button>
 
                           {openStatusIndex === realIndex && (
-                            <div className="absolute right-0 top-full mt-1 z-50 min-w-[130px] rounded-none border border-[#1F2022] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
+                            <div className="absolute right-0 top-full mt-1 z-50 min-w-[130px] rounded-none border border-[#DED9CF] bg-white shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150">
                               {(["Pending", "Approved", "Rejected"] as ReviewStatus[]).map((statusOption) => (
                                 <button
                                   key={statusOption}
@@ -986,7 +986,7 @@ export default function ReviewPage() {
                         value={row.description}
                         onChange={(e) => updateRow(realIndex, "description", e.target.value)}
                         rows={3}
-                        className="w-full rounded-none border border-[#1F2022] bg-white p-3 text-xs text-[#1F2022] leading-relaxed outline-none focus:ring-1 focus:ring-[#1F2022] resize-y font-normal"
+                        className="w-full rounded-none border border-[#DED9CF] bg-white p-3 text-xs text-[#1F2022] leading-relaxed outline-none focus:border-[#353B2D] resize-y font-normal"
                         placeholder="AI generated description..."
                       />
                     </div>
