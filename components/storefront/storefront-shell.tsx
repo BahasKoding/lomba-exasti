@@ -11,6 +11,7 @@ import { FloatingCartBadge } from "@/components/storefront/floating-cart-badge";
 
 export function StorefrontShell({ children }: { children: React.ReactNode }) {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [storeSettings, setStoreSettings] = useState({
     whatsappNumber: "6281234567890",
     inquiryTemplate: "Hello SmartCap Studio, I would like to inquire about..",
@@ -126,7 +127,7 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
             )}
 
             {/* Mobile Hamburger Drawer (No Outline/Border) */}
-            <Sheet>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger className="md:hidden flex h-10 w-10 items-center justify-center rounded-none border-0 bg-transparent text-[#1F2022] hover:bg-[#1F2022]/10 transition-all cursor-pointer outline-none focus:outline-none ring-0 shadow-none">
                 <Menu className="h-6 w-6 stroke-[2]" />
                 <span className="sr-only">Toggle menu</span>
@@ -152,6 +153,7 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
                         <Link
                           key={item.label}
                           href={item.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
                           className={`transition-opacity hover:opacity-75 ${
                             active ? "font-black underline underline-offset-4 decoration-2" : "font-medium text-[#1F2022]/80"
                           }`}
@@ -165,6 +167,7 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
                       {isAdminLoggedIn ? (
                         <Link
                           href="/admin"
+                          onClick={() => setIsMobileMenuOpen(false)}
                           className="flex w-full items-center justify-center gap-2 rounded-none bg-[#1F2022] py-3 text-xs font-extrabold text-white shadow-md transition hover:bg-black"
                         >
                           <span className="h-2 w-2 rounded-none bg-emerald-400 animate-pulse"></span>
@@ -173,6 +176,7 @@ export function StorefrontShell({ children }: { children: React.ReactNode }) {
                       ) : (
                         <Link
                           href="/login"
+                          onClick={() => setIsMobileMenuOpen(false)}
                           className={`flex w-full items-center justify-center gap-2 rounded-none py-3 text-xs font-extrabold shadow-xs transition ${
                             pathname === "/login"
                               ? "bg-[#1F2022] text-white"

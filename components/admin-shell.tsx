@@ -1,6 +1,6 @@
 "use client"; // semua yang interaktif (pathname, logout, menu mobile) hidup di browser
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, ArrowLeft } from "lucide-react";
@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // legacy marker dari UI lama — dijaga agar konsisten saat logout
@@ -97,7 +98,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               <span className="h-1.5 w-1.5 rounded-none bg-emerald-400"></span>
               <span>Admin</span>
             </Link>
-            <Sheet>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger className="md:hidden flex h-10 w-10 items-center justify-center rounded-none border-0 bg-transparent text-[#1F2022] hover:bg-[#1F2022]/10 transition-all cursor-pointer outline-none focus:outline-none ring-0 shadow-none">
                 <Menu className="h-6 w-6 stroke-[2]" />
                 <span className="sr-only">Toggle menu</span>
@@ -121,7 +122,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                       <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#94908C]">Main Navigation</span>
                       <nav className="flex flex-col gap-5 text-base font-bold text-[#1F2022]">
                         {navItems.map((item) => (
-                          <Link key={item.label} href={item.href} className="transition-opacity hover:opacity-75">
+                          <Link key={item.label} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className="transition-opacity hover:opacity-75">
                             {item.label}
                           </Link>
                         ))}
@@ -131,12 +132,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                       <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#94908C]">Admin Menu</span>
                       <nav className="flex flex-col gap-5 text-sm font-bold text-[#1F2022]">
                         {sidebarItems.map((item) => (
-                          <Link key={item.label} href={item.href} className="transition-opacity hover:opacity-75">
+                          <Link key={item.label} href={item.href} onClick={() => setIsMobileMenuOpen(false)} className="transition-opacity hover:opacity-75">
                             {item.label}
                           </Link>
                         ))}
                       </nav>
-                      <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 mt-2 cursor-pointer transition-opacity">
+                      <button onClick={(e) => { setIsMobileMenuOpen(false); handleLogout(e); }} className="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 mt-2 cursor-pointer transition-opacity">
                         <ArrowLeft className="h-4 w-4" />
                         Logout
                       </button>
