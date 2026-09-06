@@ -17,46 +17,6 @@ type CartItem = {
   quantity: number;
 };
 
-// Initial fallback sample cart products matching the wireframe
-const fallbackCartItems: CartItem[] = [
-  {
-    id: "cart-1",
-    name: "Topi Bennie",
-    slug: "topi-bennie-1",
-    price: 15000,
-    imageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80",
-    color: "Black",
-    quantity: 1,
-  },
-  {
-    id: "cart-2",
-    name: "Topi Bennie",
-    slug: "topi-bennie-2",
-    price: 15000,
-    imageUrl: "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=600&q=80",
-    color: "Black",
-    quantity: 1,
-  },
-  {
-    id: "cart-3",
-    name: "Topi Bennie",
-    slug: "topi-bennie-3",
-    price: 15000,
-    imageUrl: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=600&q=80",
-    color: "Black",
-    quantity: 1,
-  },
-  {
-    id: "cart-4",
-    name: "Topi Bennie",
-    slug: "topi-bennie-4",
-    price: 15000,
-    imageUrl: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?auto=format&fit=crop&w=600&q=80",
-    color: "Black",
-    quantity: 1,
-  },
-];
-
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [waNumber, setWaNumber] = useState("6281234567890");
@@ -66,27 +26,27 @@ export default function CartPage() {
       // Read saved cart from localStorage
       try {
         const rawCart = localStorage.getItem("cart");
-        if (rawCart) {
+        if (rawCart !== null) {
           const parsed = JSON.parse(rawCart);
-          if (Array.isArray(parsed) && parsed.length > 0) {
+          if (Array.isArray(parsed)) {
             const normalized: CartItem[] = parsed.map((item: any, idx: number) => ({
               id: item.id || `item-${idx}`,
-              name: item.name || "Topi Bennie",
-              slug: item.slug || "topi-bennie",
-              price: Number(item.price) || 15000,
-              imageUrl: item.imageUrl || fallbackCartItems[0].imageUrl,
+              name: item.name || "Product",
+              slug: item.slug || "product",
+              price: Number(item.price) || 0,
+              imageUrl: item.imageUrl || "",
               color: item.color || "Black",
-              quantity: item.quantity || 1,
+              quantity: Number(item.quantity) || 1,
             }));
             setCartItems(normalized);
           } else {
-            setCartItems(fallbackCartItems);
+            setCartItems([]);
           }
         } else {
-          setCartItems(fallbackCartItems);
+          setCartItems([]);
         }
       } catch (e) {
-        setCartItems(fallbackCartItems);
+        setCartItems([]);
       }
 
       // Read store whatsapp number from settings

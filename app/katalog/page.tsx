@@ -17,76 +17,6 @@ const FOOTER_CATEGORIES = [
   "Snapback",
 ];
 
-// Fallback catalog products in case database is empty or loading
-const fallbackProducts: CatalogProduct[] = [
-  {
-    id: "f1",
-    name: "Urban Baseball Cap Classic",
-    slug: "urban-baseball-cap-classic",
-    description: "Urban style baseball cap in premium Cotton Twill, comfortable for daily wear.",
-    price: 149000,
-    imageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80",
-    stockCount: 12,
-    category: "Baseball Cap",
-    material: "Cotton Twill",
-  },
-  {
-    id: "f2",
-    name: "Classic Bucket Hat Denim",
-    slug: "classic-bucket-hat-denim",
-    description: "Waterproof denim bucket hat with casual outdoor aesthetics.",
-    price: 129000,
-    imageUrl: "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=600&q=80",
-    stockCount: 8,
-    category: "Bucket Hat",
-    material: "Waterproof Canvas",
-  },
-  {
-    id: "f3",
-    name: "Vintage Snapback Hip-Hop",
-    slug: "vintage-snapback-hip-hop",
-    description: "Vintage style snapback with premium corduroy and sharp structured visor.",
-    price: 150000,
-    imageUrl: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=600&q=80",
-    stockCount: 15,
-    category: "Snapback",
-    material: "Corduroy Blend",
-  },
-  {
-    id: "f4",
-    name: "Trucker Hat Foam Panel Sporty",
-    slug: "trucker-hat-foam-panel-sporty",
-    description: "Sporty trucker hat with breathable rear mesh for maximum airflow.",
-    price: 98000,
-    imageUrl: "https://images.unsplash.com/photo-1517423568366-8b98471794e0?auto=format&fit=crop&w=600&q=80",
-    stockCount: 19,
-    category: "Trucker Cap",
-    material: "Breathable Mesh",
-  },
-  {
-    id: "f5",
-    name: "Minimalist Baseball Dad Hat",
-    slug: "minimalist-baseball-dad-hat",
-    description: "Minimalist dad hat baseball cap with exclusive side embroidery detail.",
-    price: 139000,
-    imageUrl: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=600&q=80",
-    stockCount: 5,
-    category: "Baseball Cap",
-    material: "Washed Cotton",
-  },
-  {
-    id: "f6",
-    name: "Outdoor Bucket Hat Safari",
-    slug: "outdoor-bucket-hat-safari",
-    description: "Outdoor safari bucket hat ideal for adventures with a flexible chin strap.",
-    price: 169000,
-    imageUrl: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?auto=format&fit=crop&w=600&q=80",
-    stockCount: 10,
-    category: "Bucket Hat",
-    material: "Ripstop Nylon",
-  },
-];
-
 function CatalogContent() {
   const searchParams = useSearchParams();
   const initialCategoryParam = searchParams.get("category");
@@ -112,14 +42,10 @@ function CatalogContent() {
     setLoading(true);
     fetchCatalog()
       .then((data) => {
-        if (data.length > 0) {
-          setProducts(data);
-        } else {
-          setProducts(fallbackProducts);
-        }
+        setProducts(data || []);
       })
       .catch(() => {
-        setProducts(fallbackProducts);
+        setProducts([]);
       })
       .finally(() => setLoading(false));
   }, []);

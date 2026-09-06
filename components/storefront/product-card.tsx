@@ -13,15 +13,24 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
 
     try {
       const raw = localStorage.getItem("cart");
-      const cart = raw ? JSON.parse(raw) : [];
-      cart.push({
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        category: product.category,
-      });
+      const cart: any[] = raw ? JSON.parse(raw) : [];
+      const existingIdx = cart.findIndex(
+        (item: any) => item.id === product.id || item.slug === product.slug
+      );
+      if (existingIdx > -1) {
+        cart[existingIdx].quantity = (Number(cart[existingIdx].quantity) || 1) + 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          imageUrl: product.imageUrl,
+          category: product.category,
+          color: "Black",
+          quantity: 1,
+        });
+      }
       localStorage.setItem("cart", JSON.stringify(cart));
     } catch (err) {}
 
