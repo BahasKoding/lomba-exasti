@@ -385,11 +385,10 @@ export default function AdminDashboard() {
                 <button
                   key={f}
                   onClick={() => setStatusFilter(f)}
-                  className={`rounded-none px-4 py-1.5 text-xs font-bold transition cursor-pointer capitalize ${
-                    active
+                  className={`rounded-none px-4 py-1.5 text-xs font-bold transition cursor-pointer capitalize ${active
                       ? "bg-[#1F2022] text-[#FCFAF7]"
                       : "border border-[#E5E2DC] text-[#94908C] hover:border-[#1F2022] hover:text-[#1F2022]"
-                  }`}
+                    }`}
                 >
                   {f === "all" ? "All" : f} ({count})
                 </button>
@@ -454,11 +453,10 @@ export default function AdminDashboard() {
                             variant={p.status === "published" ? "outline" : "default"}
                             disabled={togglingId === p.id || deletingId === p.id}
                             onClick={() => toggleStatus(p)}
-                            className={`rounded-none px-3 text-xs font-bold cursor-pointer gap-1.5 ${
-                              p.status === "published"
+                            className={`rounded-none px-3 text-xs font-bold cursor-pointer gap-1.5 ${p.status === "published"
                                 ? "border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7]"
                                 : "bg-[#1F2022] text-[#FCFAF7] hover:bg-[#1F2022]/90"
-                            }`}
+                              }`}
                           >
                             {togglingId === p.id ? (
                               <Loader className="h-3.5 w-3.5 animate-spin" />

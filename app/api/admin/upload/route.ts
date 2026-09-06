@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/auth";
 
 const buildAiResult = (fileName: string, index: number) => {
   const cleanName = fileName.split(".")[0].replace(/[-_]+/g, " ");
@@ -48,6 +49,11 @@ const normalizeUploadData = (payload: any, fallbackFiles: File[]) => {
 };
 
 export async function POST(request: Request) {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+  }
+
   try {
     const formData = await request.formData();
     const files = formData.getAll("files").filter((file) => file instanceof File);

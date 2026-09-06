@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED = ["/admin"];
+const PROTECTED = ["/admin", "/api/products", "/api/ingest", "/api/admin"];
 
 export function middleware(request: NextRequest) {
     const isLoggedIn = request.cookies.has("sc_session");

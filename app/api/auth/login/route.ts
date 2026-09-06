@@ -6,7 +6,15 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
-    const { email, password } = await request.json();
+    // BUG-BE-003 fix: body yang bukan JSON valid harus 400 terstruktur, bukan 500 SyntaxError
+    let body: { email?: string; password?: string };
+    try {
+        body = await request.json();
+    } catch {
+        return NextResponse.json({ error: "Body bukan JSON valid." }, { status: 400 });
+    }
+
+    const { email, password } = body;
 
     if (!email || !password) {
         return NextResponse.json({ error: "Email dan password wajib diisi." }, { status: 400 });

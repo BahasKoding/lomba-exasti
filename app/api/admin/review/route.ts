@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/auth";
 
 const mockReviewData = [
   {
@@ -72,6 +73,11 @@ const normalizeReviewData = (payload: any) => {
 };
 
 export async function GET() {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+  }
+
   try {
     const externalEndpoint = process.env.NEXT_PUBLIC_AI_REVIEW_ENDPOINT || process.env.AI_REVIEW_ENDPOINT;
 
@@ -106,6 +112,11 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+  }
+
   try {
     const payload = await request.json();
 
