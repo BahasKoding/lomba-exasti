@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { productsTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth";
 
 // "Topi Baseball Merah!" -> "topi-baseball-merah" (a clean web address)
 function slugify(name: string): string {
@@ -15,6 +16,11 @@ function slugify(name: string): string {
 export const dynamic = "force-dynamic";
 
 export async function PATCH(request: Request) {
+    const user = await getSessionUser();
+    if (!user) {
+        return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    }
+
     let body: { id?: string; status?: string };
     try {
         body = await request.json();
@@ -47,6 +53,11 @@ export async function PATCH(request: Request) {
 
 
 export async function GET() {
+    const user = await getSessionUser();
+    if (!user) {
+        return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    }
+
     try {
         const all = await db.select().from(productsTable);
         return NextResponse.json({ success: true, data: all });
@@ -59,6 +70,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const user = await getSessionUser();
+    if (!user) {
+        return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    }
+
     let body: {
         products: {
             name: string;
@@ -81,6 +97,22 @@ export async function POST(request: Request) {
     const items = body.products;
     if (!Array.isArray(items) || items.length === 0) {
         return NextResponse.json({ error: "Field 'products' wajib berisi minimal 1 item." }, { status: 400 });
+    }
+
+    // BUG-BE-004 fix: validasi SETIAP item sebelum disentuh slugify/insert,
+    // supaya payload invalid dapat 4xx terstruktur, bukan 500 + exception bocor
+    for (const item of items) {
+        if (
+            !item?.name || typeof item.name !== "string" ||
+            !item.category || typeof item.category !== "string" ||
+            !item.description || typeof item.description !== "string" ||
+            typeof item.price !== "number" || !Number.isFinite(item.price) || item.price < 0
+        ) {
+            return NextResponse.json(
+                { error: "Setiap produk wajib punya 'name', 'category', 'description' (string), dan 'price' (number >= 0)." },
+                { status: 400 },
+            );
+        }
     }
 
     try {
@@ -138,4 +170,4 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ success: false, error: error.message ?? "Failed to delete product." }, { status: 500 });
     }
 }
-
+
