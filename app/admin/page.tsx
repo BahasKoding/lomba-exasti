@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, AlertCircle, Loader, X, Info, RefreshCw, Trash2, Eye, EyeOff } from "lucide-react";
@@ -39,6 +39,30 @@ export default function AdminDashboard() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "parked" | "published">("all");
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const infoPopupMobileRef = useRef<HTMLDivElement>(null);
+  const infoPopupDesktopRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowMobileFilter(false);
+      }
+      if (
+        infoPopupMobileRef.current &&
+        !infoPopupMobileRef.current.contains(event.target as Node) &&
+        infoPopupDesktopRef.current &&
+        !infoPopupDesktopRef.current.contains(event.target as Node)
+      ) {
+        setShowInfoPopup(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const filteredProducts =
     statusFilter === "all" ? products : products.filter((p) => p.status === statusFilter);
@@ -115,11 +139,27 @@ export default function AdminDashboard() {
     };
   }, [previewUrls]);
 
+  const isImageFile = (file: File) => {
+    if (file.type && file.type.startsWith("image/")) return true;
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    return ["jpg", "jpeg", "png", "webp", "gif", "svg", "bmp", "avif"].includes(ext);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setSelectedFiles((prev) => [...prev, ...newFiles]);
-      setError(null);
+      const incomingFiles = Array.from(e.target.files);
+      const validImages = incomingFiles.filter(isImageFile);
+      const invalidFiles = incomingFiles.filter((f) => !isImageFile(f));
+
+      if (invalidFiles.length > 0) {
+        setError(`File "${invalidFiles[0].name}" is not a valid image. Only image files (PNG, JPG, WEBP) are allowed.`);
+      } else {
+        setError(null);
+      }
+
+      if (validImages.length > 0) {
+        setSelectedFiles((prev) => [...prev, ...validImages]);
+      }
     }
   };
 
@@ -171,7 +211,7 @@ export default function AdminDashboard() {
         throw new Error(data.error || "Failed to process images with AI.");
       }
 
-      sessionStorage.setItem("drafts", JSON.stringify({ items, results: data.results }));
+      sessionStorage.setItem("drafts", JSON.stringify({ items, results: data.results, createdAt: new Date().toISOString() }));
       router.push("/admin/review");
     } catch (err: any) {
       setError(err.message || "An error occurred while uploading files.");
@@ -180,22 +220,69 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Page Title Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-extrabold tracking-tight text-[#1F2022]">Bulk Massal</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-[#1F2022]/80">
+    <div className="space-y-6 md:space-y-8">
+      {/* 1. Page Title Header Block */}
+      <div className="relative rounded-none border border-transparent md:border-none bg-[#D8D4CD]/40 md:bg-transparent p-5 md:p-0 shadow-none space-y-2 md:space-y-2">
+        <div className="flex justify-between items-start">
+          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[#1F2022]">Bulk Massal</h1>
+          
+          {/* Info Icon (Mobile Only) */}
+          <div className="md:hidden">
+            <div className="relative" ref={infoPopupMobileRef}>
+              <button
+                type="button"
+                onClick={() => setShowInfoPopup((prev) => !prev)}
+                className="flex h-7 w-7 items-center justify-center rounded-none border border-[#1F2022]/40 bg-transparent text-[#1F2022] transition-all duration-200 cursor-pointer"
+                title="Workflow Information"
+              >
+                <span className="font-serif text-sm font-bold italic">i</span>
+              </button>
+
+              {/* Floating Pop-up (Mobile) */}
+              {showInfoPopup && (
+                <div className="absolute right-0 top-full pt-2 z-50 w-72 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="rounded-none border border-[#E5E2DC] bg-white p-5 shadow-xl">
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <h3 className="text-sm font-extrabold text-[#1F2022]">How It Works</h3>
+                        <p className="mt-1 text-[10px] text-[#94908C]">
+                          Streamline your catalog management with our intelligent bulk processing workflow designed for effortless curation.
+                        </p>
+                      </div>
+                      <div className="space-y-2.5 pt-2 text-[10px] text-[#1F2022]">
+                        <div>
+                          <p className="font-extrabold text-[#1F2022]">1. Upload Your Collection</p>
+                          <p className="mt-0.5 text-[#94908C]">Select and upload multiple product images of your caps simultaneously into the studio workspace.</p>
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-[#1F2022]">2. Intelligent Visual Analysis</p>
+                          <p className="mt-0.5 text-[#94908C]">Our advanced AI vision engine automatically inspects each piece detecting the category, material texture, and structural details to draft compelling commercial descriptions.</p>
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-[#1F2022]">3. Review & Publish</p>
+                          <p className="mt-0.5 text-[#94908C]">Examine the generated results in the AI Review suite to ensure absolute perfection before publishing them instantly to your storefront catalog.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <p className="max-w-3xl text-[11px] md:text-sm leading-relaxed text-[#1F2022]/90 md:text-[#1F2022]/80">
           Seamlessly upload your entire collection in a single batch. Intelligent AI vision instantly analyzes each piece's
           fabric and aesthetic, effortlessly crafting bespoke commercial descriptions for your catalog.
         </p>
       </div>
 
-      {/* Main Container Wireframe Card (Strictly 0 Corner Radius: rounded-none) */}
-      <div className="relative overflow-visible rounded-none border border-[#E5E2DC] bg-[#D8D4CD]/30 p-6 md:p-10 shadow-xs">
-        {/* Info Icon (Top Right) */}
-        <div className="absolute right-6 top-6 z-20">
+      {/* 2. Main Container Wireframe Card */}
+      <div className="relative overflow-visible rounded-none border border-transparent md:border-[#E5E2DC] bg-[#D8D4CD]/40 md:bg-[#D8D4CD]/30 p-5 md:p-10 shadow-none md:shadow-xs">
+        {/* Info Icon (Desktop Only) */}
+        <div className="hidden md:block absolute right-6 top-6 z-20">
           <div
             className="relative"
+            ref={infoPopupDesktopRef}
             onMouseEnter={() => setShowInfoPopup(true)}
             onMouseLeave={() => setShowInfoPopup(false)}
           >
@@ -208,10 +295,11 @@ export default function AdminDashboard() {
               <Info className="h-5 w-5" />
             </button>
 
-            {/* Floating Pop-up: "How It Works" (Strictly 0 Corner Radius: rounded-none) */}
+            {/* Floating Pop-up: "How It Works" (Desktop) */}
             {showInfoPopup && (
-              <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-none border border-[#E5E2DC] bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-                <div className="space-y-4">
+              <div className="absolute right-0 top-full pt-2 z-50 w-96 animate-in fade-in zoom-in-95 duration-200">
+                <div className="rounded-none border border-[#E5E2DC] bg-white p-6 shadow-xl">
+                  <div className="space-y-4">
                   <div className="text-center">
                     <h3 className="text-base font-extrabold text-[#1F2022]">How It Works</h3>
                     <p className="mt-1 text-xs text-[#94908C]">
@@ -243,11 +331,12 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
           </div>
         </div>
 
-        {/* Drag & Drop Upload Zone (Strictly 0 Corner Radius: rounded-none) */}
+        {/* Drag & Drop Upload Zone */}
         <div className="mx-auto max-w-xl">
           <div className="relative group">
             <input
@@ -318,16 +407,16 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Action Generate Button (Strictly 0 Corner Radius: rounded-none) */}
-          <div className="mt-2">
+          {/* Action Generate Button */}
+          <div className="mt-2 w-full md:w-auto flex justify-center">
             <Button
               onClick={handleSubmit}
               disabled={isUploading || selectedFiles.length === 0}
               size="lg"
-              className="h-11 min-w-[200px] rounded-none bg-[#707070] px-8 text-sm font-bold text-white transition-all hover:bg-[#1F2022] disabled:opacity-50 cursor-pointer"
+              className="h-11 w-[80%] md:w-auto md:min-w-[200px] rounded-none bg-[#898989] px-8 text-sm font-bold text-white transition-all hover:bg-[#1F2022] disabled:opacity-50 cursor-pointer"
             >
               {isUploading ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Loader className="h-4 w-4 animate-spin" />
                   <span>Processing...</span>
                 </div>
@@ -354,30 +443,88 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Product Directory Table (Strictly 0 Corner Radius: rounded-none) */}
-      <div className="overflow-hidden rounded-none border border-[#E5E2DC] bg-[#FFFFFF] shadow-xs">
-        <div className="space-y-6 p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight text-[#1F2022]">Product Directory</h2>
-              <p className="mt-1 text-sm text-[#94908C]">
-                Products marked as <span className="font-semibold text-[#1F2022]">Parked</span> are hidden from the public storefront — publication control is in your hands.
-              </p>
+      {/* 3. Product Directory Table */}
+      <div className="overflow-hidden rounded-none border border-transparent md:border-[#E5E2DC] bg-[#D8D4CD]/40 md:bg-[#FFFFFF] shadow-none md:shadow-xs p-5 md:p-0">
+        <div className="space-y-5 md:space-y-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[#1F2022]">Product Directory</h2>
+                <p className="mt-1 text-[11px] md:text-sm text-[#1F2022]/90 md:text-[#94908C]">
+                  Products marked as <span className="font-bold text-[#1F2022]">Parked</span> are hidden from the public storefront publication control is in your hands.
+                </p>
+              </div>
+              
+              {/* Vertical Dots Icon (Mobile) with Dropdown */}
+              <div className="md:hidden relative" ref={dropdownRef}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowMobileFilter(!showMobileFilter)}
+                  className="flex h-7 w-7 items-center justify-center bg-transparent border-none outline-none cursor-pointer"
+                >
+                  <svg className="w-5 h-5 text-[#1F2022]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu (Mobile Only) */}
+                {showMobileFilter && (
+                  <div className="absolute right-0 top-full mt-2 z-50 w-48 rounded-none border border-[#E5E2DC] bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex flex-col py-2">
+                      <span className="px-4 py-2 text-xs font-bold text-[#94908C] uppercase tracking-wider">Filter Status</span>
+                      {(["all", "parked", "published"] as const).map((f) => {
+                        const count = f === "all" ? products.length : products.filter((p) => p.status === f).length;
+                        const active = statusFilter === f;
+                        return (
+                          <button
+                            key={f}
+                            onClick={() => {
+                              setStatusFilter(f);
+                              setShowMobileFilter(false);
+                            }}
+                            className={`flex justify-between items-center px-4 py-2 text-xs font-bold text-left transition cursor-pointer capitalize ${
+                              active
+                                ? "bg-[#1F2022] text-[#FCFAF7]"
+                                : "text-[#1F2022] hover:bg-[#FCFAF7]"
+                            }`}
+                          >
+                            <span>{f === "all" ? "All" : f}</span>
+                            <span className={active ? "text-white" : "text-[#94908C]"}>({count})</span>
+                          </button>
+                        );
+                      })}
+                      <div className="border-t border-[#E5E2DC] mt-1 pt-1">
+                        <button
+                          onClick={() => {
+                            loadProducts();
+                            setShowMobileFilter(false);
+                          }}
+                          className="flex w-full items-center gap-2 px-4 py-2 text-xs font-bold text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer"
+                        >
+                          <RefreshCw className={`h-3.5 w-3.5 ${loadingProducts ? "animate-spin" : ""}`} />
+                          Refresh List
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+            
             <Button
               variant="outline"
               size="sm"
               onClick={loadProducts}
               disabled={loadingProducts}
-              className="gap-2 rounded-none border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer text-xs font-bold"
+              className="hidden md:flex gap-2 rounded-none border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer text-xs font-bold"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loadingProducts ? "animate-spin" : ""}`} />
               Refresh List
             </Button>
           </div>
 
-          {/* Status filter tabs (Strictly 0 Corner Radius: rounded-none) */}
-          <div className="flex gap-2">
+          {/* Status filter tabs (Desktop Only) */}
+          <div className="hidden md:flex gap-2">
             {(["all", "parked", "published"] as const).map((f) => {
               const count = f === "all" ? products.length : products.filter((p) => p.status === f).length;
               const active = statusFilter === f;
@@ -405,67 +552,67 @@ export default function AdminDashboard() {
                 : "No products found with this status."}
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-none border border-[#E5E2DC]">
-              <Table>
+            <div className="overflow-x-auto rounded-none border-none md:border md:border-[#E5E2DC] bg-white p-4 md:p-0">
+              <Table className="min-w-full table-auto">
                 <TableHeader>
-                  <TableRow className="bg-[#FCFAF7]">
-                    <TableHead className="pl-4 font-bold text-[#1F2022]">Photo</TableHead>
-                    <TableHead className="font-bold text-[#1F2022]">Product Name</TableHead>
-                    <TableHead className="font-bold text-[#1F2022]">Price</TableHead>
-                    <TableHead className="font-bold text-[#1F2022]">Status</TableHead>
-                    <TableHead className="pr-4 text-right font-bold text-[#1F2022]">Actions</TableHead>
+                  <TableRow className="bg-transparent md:bg-[#FCFAF7] border-b-0 md:border-b">
+                    <TableHead className="pl-0 md:pl-4 font-bold text-[#1F2022] text-[11px] md:text-sm">Photo</TableHead>
+                    <TableHead className="font-bold text-[#1F2022] text-[11px] md:text-sm">Name</TableHead>
+                    <TableHead className="font-bold text-[#1F2022] text-[11px] md:text-sm">Price</TableHead>
+                    <TableHead className="font-bold text-[#1F2022] text-[11px] md:text-sm">Status</TableHead>
+                    <TableHead className="pr-0 md:pr-4 text-right font-bold text-[#1F2022] text-[11px] md:text-sm">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredProducts.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="pl-4">
+                    <TableRow key={p.id} className="border-b-0 md:border-b">
+                      <TableCell className="pl-0 md:pl-4 py-2 md:py-4">
                         {p.imageUrl ? (
                           <img
                             src={p.imageUrl}
                             alt={p.name}
-                            className="h-12 w-12 rounded-none border border-[#E5E2DC] object-cover"
+                            className="h-10 w-10 md:h-12 md:w-12 rounded-none border border-transparent md:border-[#E5E2DC] object-cover bg-gray-400"
                           />
                         ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-none border border-[#E5E2DC] bg-[#FCFAF7] text-lg">
-                            🧢
+                          <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-none border border-transparent md:border-[#E5E2DC] bg-[#898989] text-lg">
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-bold text-[#1F2022]">{p.name}</TableCell>
-                      <TableCell className="font-extrabold text-[#1F2022]">{formatRupiah(p.price)}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-bold text-[#1F2022] text-[10px] md:text-sm py-2 md:py-4 truncate max-w-[80px] md:max-w-none">{p.name}</TableCell>
+                      <TableCell className="font-extrabold text-[#1F2022] text-[10px] md:text-sm py-2 md:py-4">{formatRupiah(p.price)}</TableCell>
+                      <TableCell className="py-2 md:py-4">
                         <Badge
                           className={
                             p.status === "published"
-                              ? "rounded-none bg-emerald-100 text-emerald-800 hover:bg-emerald-100 font-bold border border-emerald-300"
-                              : "rounded-none bg-amber-100 text-amber-800 hover:bg-amber-100 font-bold border border-amber-300"
+                              ? "rounded-none bg-emerald-100 text-emerald-800 hover:bg-emerald-100 font-bold border border-emerald-300 text-[9px] md:text-xs px-1 md:px-2.5 py-0 md:py-0.5"
+                              : "rounded-none bg-amber-100 text-amber-800 hover:bg-amber-100 font-bold border border-amber-300 text-[9px] md:text-xs px-1 md:px-2.5 py-0 md:py-0.5"
                           }
                         >
                           {p.status === "published" ? "Published" : "Parked"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="pr-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Publish / Park Toggle Button (Strictly 0 Corner Radius: rounded-none) */}
+                      <TableCell className="pr-0 md:pr-4 text-right py-2 md:py-4">
+                        <div className="flex items-center justify-end gap-1 md:gap-2">
                           <Button
                             size="sm"
                             variant={p.status === "published" ? "outline" : "default"}
                             disabled={togglingId === p.id || deletingId === p.id}
                             onClick={() => toggleStatus(p)}
-                            className={`rounded-none px-3 text-xs font-bold cursor-pointer gap-1.5 ${p.status === "published"
+                            className={`rounded-none px-1.5 md:px-3 h-6 md:h-9 text-[9px] md:text-xs font-bold cursor-pointer gap-1 md:gap-1.5 ${
+                              p.status === "published"
                                 ? "border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7]"
                                 : "bg-[#1F2022] text-[#FCFAF7] hover:bg-[#1F2022]/90"
                               }`}
                           >
                             {togglingId === p.id ? (
-                              <Loader className="h-3.5 w-3.5 animate-spin" />
+                              <Loader className="h-3 w-3 md:h-3.5 md:w-3.5 animate-spin" />
                             ) : p.status === "published" ? (
-                              <EyeOff className="h-3.5 w-3.5" />
+                              <EyeOff className="h-3 w-3 md:h-3.5 md:w-3.5" />
                             ) : (
-                              <Eye className="h-3.5 w-3.5" />
+                              <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
                             )}
-                            <span>{p.status === "published" ? "Unpublish" : "Publish"}</span>
+                            <span className="hidden md:inline">{p.status === "published" ? "Unpublish" : "Publish"}</span>
+                            <span className="md:hidden">Toggle</span>
                           </Button>
                         </div>
                       </TableCell>

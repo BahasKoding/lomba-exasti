@@ -3,117 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Minus, Plus, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Minus, Plus, Check, Loader } from "lucide-react";
 
 import { StorefrontShell } from "@/components/storefront/storefront-shell";
 import { buildOrderWhatsAppUrl, fetchCatalog, formatPrice, type CatalogProduct } from "@/lib/public-catalog";
-
-const dummyDetailCatalog: Record<string, {
-  name: string;
-  price: number;
-  description: string;
-  subtext: string;
-  images: string[];
-}> = {
-  "urban-baseball-cap": {
-    name: "Urban Baseball Cap",
-    price: 149000,
-    description: "Crafted from 100% premium cotton twill, featuring a classic 6-panel silhouette, embroidered eyelets for ventilation, and an adjustable metallic strapback closure for custom day-long comfort.",
-    subtext: "Cotton Twill",
-    images: [
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517423568366-8b98471794e0?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  "classic-bucket-hat": {
-    name: "Classic Bucket Hat",
-    price: 169000,
-    description: "Engineered from water-repellent canvas fabric, providing full 360-degree shade protection with a soft structured brim and breathable mesh lining.",
-    subtext: "Waterproof Canvas",
-    images: [
-      "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  "vintage-snapback": {
-    name: "Vintage Snapback",
-    price: 189000,
-    description: "Retro corduroy texture combined with structured crown panels and a flat brim for timeless streetwear sophistication.",
-    subtext: "Corduroy Blend",
-    images: [
-      "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1534215754734-18e55d13e346?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  "minimalist-beanie": {
-    name: "Minimalist Beanie",
-    price: 129000,
-    description: "Ultra-soft wool knit beanie offering snug elastic warmth and a clean cuffed rib design suited for minimalist aesthetics.",
-    subtext: "Soft Wool Knitted",
-    images: [
-      "https://images.unsplash.com/photo-1534215754734-18e55d13e346?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  "trucker-mesh-cap": {
-    name: "Trucker Mesh Cap",
-    price: 139000,
-    description: "Classic high-crown foam front panel with breathable rear mesh netting and snap closure for effortless outdoor utility.",
-    subtext: "Breathable Mesh",
-    images: [
-      "https://images.unsplash.com/photo-1517423568366-8b98471794e0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  "streetwear-dad-hat": {
-    name: "Streetwear Dad Hat",
-    price: 159000,
-    description: "Washed denim finish with an unconstructed low-profile fit, pre-curved visor, and antique brass buckle closure.",
-    subtext: "Washed Denim",
-    images: [
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-  "signature-edition-cap": {
-    name: "Signature Edition Cap",
-    price: 249000,
-    description: "Limited release SKU crafted with custom woven patch embroidery, premium satin interior lining, and individual serial numbering.",
-    subtext: "Limited Release SKU",
-    images: [
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=80",
-    ],
-  },
-};
-
-const relatedItems = [
-  {
-    name: "Urban Baseball Cap",
-    slug: "urban-baseball-cap",
-    subtext: "Cotton Twill",
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    name: "Classic Bucket Hat",
-    slug: "classic-bucket-hat",
-    subtext: "Waterproof Canvas",
-    image: "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    name: "Vintage Snapback",
-    slug: "vintage-snapback",
-    subtext: "Corduroy Blend",
-    image: "https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?auto=format&fit=crop&w=600&q=80",
-  },
-];
 
 const colorOptions = [
   { name: "Default", hex: "#D9D9D9" },
@@ -132,6 +25,7 @@ export default function ProductDetailPage() {
   const slug = decodeURIComponent(slugStr || "").toLowerCase().trim();
 
   const [dbProducts, setDbProducts] = useState<CatalogProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -140,9 +34,11 @@ export default function ProductDetailPage() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     fetchCatalog()
-      .then((data) => setDbProducts(data))
-      .catch(() => {});
+      .then((data) => setDbProducts(data || []))
+      .catch(() => setDbProducts([]))
+      .finally(() => setLoading(false));
 
     if (typeof window !== "undefined") {
       const raw = localStorage.getItem("smartcap_store_settings");
@@ -162,19 +58,13 @@ export default function ProductDetailPage() {
   const dbMatch = dbProducts.find(
     (p) => p.slug.toLowerCase() === slug || p.name.toLowerCase().replace(/\s+/g, "-") === slug
   );
-  
-  const fallbackKey = Object.keys(dummyDetailCatalog).find(
-    (k) => k.toLowerCase() === slug || dummyDetailCatalog[k].name.toLowerCase() === slug.replace(/-/g, " ")
-  ) || "urban-baseball-cap";
 
-  const fallbackMatch = dummyDetailCatalog[fallbackKey];
+  const name = dbMatch?.name || "";
+  const price = dbMatch?.price || 0;
+  const description = dbMatch?.description || "";
+  const images = dbMatch?.imageUrl ? [dbMatch.imageUrl] : [];
 
-  const name = dbMatch?.name ?? fallbackMatch.name;
-  const price = dbMatch?.price ?? fallbackMatch.price;
-  const description = dbMatch?.description ?? fallbackMatch.description;
-  const images = dbMatch?.imageUrl ? [dbMatch.imageUrl, ...fallbackMatch.images.slice(1)] : fallbackMatch.images;
-
-  const currentMainImage = images[selectedImageIndex] ?? images[0];
+  const currentMainImage = images[selectedImageIndex] ?? images[0] ?? "";
 
   const handleWhatsAppOrder = () => {
     const text = encodeURIComponent(
@@ -184,20 +74,15 @@ export default function ProductDetailPage() {
   };
 
   const displayRelatedItems = useMemo(() => {
-    if (dbProducts.length > 1) {
-      const others = dbProducts.filter(
-        (p) => p.slug.toLowerCase() !== slug && p.name.toLowerCase().replace(/\s+/g, "-") !== slug
-      );
-      if (others.length > 0) {
-        return others.slice(0, 4).map((item) => ({
-          name: item.name,
-          slug: item.slug,
-          subtext: item.material || item.category || "SmartCap Collection",
-          image: item.imageUrl,
-        }));
-      }
-    }
-    return relatedItems.slice(0, 4);
+    const others = dbProducts.filter(
+      (p) => p.slug.toLowerCase() !== slug && p.name.toLowerCase().replace(/\s+/g, "-") !== slug
+    );
+    return others.slice(0, 4).map((item) => ({
+      name: item.name,
+      slug: item.slug,
+      subtext: item.material || item.category || "SmartCap Collection",
+      image: item.imageUrl,
+    }));
   }, [dbProducts, slug]);
 
   const [isMainCartAdded, setIsMainCartAdded] = useState(false);
@@ -205,16 +90,25 @@ export default function ProductDetailPage() {
   const handleAddToCartDetail = () => {
     try {
       const raw = localStorage.getItem("cart");
-      const cart = raw ? JSON.parse(raw) : [];
-      cart.push({
-        id: dbMatch?.id || `item-${Date.now()}`,
-        name: name,
-        slug: slug,
-        price: price,
-        imageUrl: currentMainImage,
-        color: colorOptions[selectedColorIndex].name,
-        quantity: quantity,
-      });
+      const cart: any[] = raw ? JSON.parse(raw) : [];
+      const itemId = dbMatch?.id || `item-${slug}`;
+      const selectedColor = colorOptions[selectedColorIndex].name;
+      const existingIdx = cart.findIndex(
+        (item: any) => (item.slug === slug || item.id === itemId) && item.color === selectedColor
+      );
+      if (existingIdx > -1) {
+        cart[existingIdx].quantity = (Number(cart[existingIdx].quantity) || 1) + quantity;
+      } else {
+        cart.push({
+          id: itemId,
+          name: name,
+          slug: slug,
+          price: price,
+          imageUrl: currentMainImage,
+          color: selectedColor,
+          quantity: quantity,
+        });
+      }
       localStorage.setItem("cart", JSON.stringify(cart));
     } catch (err) {}
 
@@ -234,16 +128,23 @@ export default function ProductDetailPage() {
 
     try {
       const raw = localStorage.getItem("cart");
-      const cart = raw ? JSON.parse(raw) : [];
-      cart.push({
-        id: `item-${Date.now()}`,
-        name: item.name,
-        slug: item.slug,
-        price: 149000,
-        imageUrl: item.image,
-        color: "Black",
-        quantity: 1,
-      });
+      const cart: any[] = raw ? JSON.parse(raw) : [];
+      const existingIdx = cart.findIndex(
+        (cItem: any) => cItem.slug === item.slug
+      );
+      if (existingIdx > -1) {
+        cart[existingIdx].quantity = (Number(cart[existingIdx].quantity) || 1) + 1;
+      } else {
+        cart.push({
+          id: `item-${item.slug}`,
+          name: item.name,
+          slug: item.slug,
+          price: 149000,
+          imageUrl: item.image,
+          color: "Black",
+          quantity: 1,
+        });
+      }
       localStorage.setItem("cart", JSON.stringify(cart));
     } catch (err) {}
 
@@ -253,6 +154,37 @@ export default function ProductDetailPage() {
     setTimeout(() => setAddedId(null), 1200);
     setTimeout(() => setToastMsg(null), 2800);
   };
+
+  if (loading) {
+    return (
+      <StorefrontShell>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+          <Loader className="h-8 w-8 animate-spin text-[#353B2D]" />
+          <p className="text-sm font-semibold text-[#6E7068]">Memuat detail produk...</p>
+        </div>
+      </StorefrontShell>
+    );
+  }
+
+  if (!dbMatch) {
+    return (
+      <StorefrontShell>
+        <main className="mx-auto max-w-7xl px-4 py-20 text-center space-y-4">
+          <h1 className="text-2xl font-black text-[#1B1C1E]">Produk Tidak Ditemukan</h1>
+          <p className="text-sm text-[#6E7068]">Produk yang Anda cari tidak tersedia dalam katalog kami.</p>
+          <div className="pt-4">
+            <Link
+              href="/katalog"
+              className="inline-flex items-center gap-2 rounded-none bg-[#353B2D] px-6 py-3 text-xs font-bold text-white uppercase tracking-wider transition hover:bg-[#C4A265] hover:text-[#1B1C1E]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Kembali ke Katalog</span>
+            </Link>
+          </div>
+        </main>
+      </StorefrontShell>
+    );
+  }
 
   return (
     <StorefrontShell>

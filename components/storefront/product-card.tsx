@@ -13,23 +13,33 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
 
     try {
       const raw = localStorage.getItem("cart");
-      const cart = raw ? JSON.parse(raw) : [];
-      cart.push({
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        category: product.category,
-      });
+      const cart: any[] = raw ? JSON.parse(raw) : [];
+      const existingIdx = cart.findIndex(
+        (item: any) => item.id === product.id || item.slug === product.slug
+      );
+      if (existingIdx > -1) {
+        cart[existingIdx].quantity = (Number(cart[existingIdx].quantity) || 1) + 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          imageUrl: product.imageUrl,
+          category: product.category,
+          color: "Black",
+          quantity: 1,
+        });
+      }
       localStorage.setItem("cart", JSON.stringify(cart));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cartUpdated"));
+      }
     } catch (err) {}
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1200);
   };
-
-  const categoryLabel = product.category ?? product.material ?? "Topi Collection";
 
   return (
     <Link
@@ -45,21 +55,16 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
         />
       </div>
 
-      {/* Card Info: Product Name, Category Text Below Name, Price & Plus (+) Cart Button */}
+      {/* Card Info: Product Name, Price Below Product Name & Plus (+) Cart Button */}
       <div className="mt-3.5 flex items-start justify-between gap-2 px-1">
         <div className="flex-1 min-w-0">
           {/* Product Name */}
-          <h3 className="truncate text-sm font-extrabold uppercase tracking-wider text-[#1B1C1E] group-hover:text-[#C4A265] group-hover:underline">
+          <h3 className="text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-tight sm:tracking-wider text-[#1B1C1E] leading-snug group-hover:text-[#C4A265] group-hover:underline break-words">
             {product.name}
           </h3>
           
-          {/* Category Text (Below Product Name) */}
-          <p className="mt-0.5 truncate text-xs font-semibold text-[#6E7068]">
-            {categoryLabel}
-          </p>
-
-          {/* Price */}
-          <p className="mt-1.5 text-sm font-black text-[#353B2D]">
+          {/* Price (Below Product Name) */}
+          <p className="mt-0.5 text-[10px] sm:text-xs md:text-sm font-black text-[#353B2D]">
             {formatPrice(product.price)}
           </p>
         </div>
