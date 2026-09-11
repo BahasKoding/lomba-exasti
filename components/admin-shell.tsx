@@ -42,6 +42,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const sidebarItems = [
     { href: "/admin", label: "Bulk Massal" },
     { href: "/admin/review", label: "AI Review" },
+    { href: "/admin/products", label: "Products" },
     { href: "/admin/settings", label: "Setting" },
   ];
 
