@@ -177,12 +177,34 @@ function CatalogContent() {
 
         </div>
 
-        {/* ── TICKER BANNER ── */}
-        <div className="w-full bg-[#353B2D] py-3.5 sm:py-4 text-white overflow-hidden shadow-xs">
-          <div className="flex justify-between items-center max-w-[1400px] mx-auto px-6 sm:px-12 text-xs sm:text-sm lg:text-base font-black uppercase tracking-[0.35em] whitespace-nowrap">
-            <span>SMARTCAP.COM</span>
-            <span className="hidden sm:inline">SMARTCAP.COM</span>
-            <span>SMARTCAP.COM</span>
+        {/* ── TICKER BANNER (Continuous Infinite Marquee Loop) ── */}
+        <div className="relative z-30 w-full bg-[#353B2D] py-3.5 sm:py-4 text-white overflow-hidden shadow-xs border-y border-[#353B2D] select-none">
+          <div className="animate-marquee flex items-center gap-8 sm:gap-14 text-xs sm:text-sm lg:text-base font-black uppercase tracking-[0.35em] whitespace-nowrap">
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            {/* Duplicate items for continuous seamless infinite loop */}
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
+            <span>SMARTCAP.STUDIO</span>
+            <span className="opacity-60">•</span>
           </div>
         </div>
 

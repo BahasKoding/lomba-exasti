@@ -4,37 +4,37 @@ import { getSessionUser } from "@/lib/auth";
 const mockReviewData = [
   {
     id: 1,
-    name: "Topi Baseball Polos",
+    name: "Plain Baseball Cap",
     material: "Cotton Twill",
     category: "Baseball Cap",
-    description: "Topi baseball polos bahan cotton twill berkualitas, cocok untuk gaya kasual sehari-hari.",
+    description: "Classic plain baseball cap made from high-quality cotton twill, perfect for everyday casual style.",
     status: "Pending",
     createdAt: "2026-09-01",
   },
   {
     id: 2,
-    name: "Bucket Hat Vintage",
+    name: "Vintage Bucket Hat",
     material: "Canvas",
     category: "Bucket Hat",
-    description: "Bucket hat gaya vintage dengan bahan canvas yang nyaman dan tahan lama untuk kegiatan outdoor.",
+    description: "Vintage style bucket hat made with durable canvas material, ideal for outdoor activities.",
     status: "Approved",
     createdAt: "2026-09-02",
   },
   {
     id: 3,
-    name: "Snapback Premium",
+    name: "Premium Snapback",
     material: "Polyester",
     category: "Snapback",
-    description: "Topi snapback premium yang dapat diatur ukurannya, memberikan tampilan urban dan modern.",
+    description: "Premium adjustable snapback cap, offering a sleek urban look.",
     status: "Pending",
     createdAt: "2026-09-02",
   },
   {
     id: 4,
-    name: "Beanie Rajut Musim Dingin",
+    name: "Winter Knit Beanie",
     material: "Wool",
     category: "Beanie",
-    description: "Beanie rajut tebal dari bahan wool yang hangat dan nyaman untuk aktivitas luar ruangan di cuaca dingin.",
+    description: "Warm thick knitted beanie made from soft wool for cold weather adventures.",
     status: "Rejected",
     createdAt: "2026-09-01",
   },
@@ -50,7 +50,7 @@ const normalizeReviewData = (payload: any) => {
     if (Array.isArray(candidate)) {
       return candidate.map((item, index) => ({
         id: item?.id ?? item?.productId ?? item?.product_id ?? item?.uuid ?? `${Date.now()}-${index}`,
-        name: item?.name ?? item?.product_name ?? item?.title ?? item?.productName ?? `Produk ${index + 1}`,
+        name: item?.name ?? item?.product_name ?? item?.title ?? item?.productName ?? `Product ${index + 1}`,
         category: item?.category ?? item?.category_name ?? item?.type ?? item?.productCategory ?? "Uncategorized",
         material: item?.material ?? item?.material_name ?? item?.fabric ?? item?.rawMaterial ?? "Unknown",
         description: item?.description ?? item?.ai_description ?? item?.generated_description ?? item?.summary ?? item?.detail ?? "",
@@ -75,7 +75,7 @@ const normalizeReviewData = (payload: any) => {
 export async function GET() {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
   }
 
   try {
@@ -104,7 +104,7 @@ export async function GET() {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Gagal mengambil data review AI.",
+        error: error.message || "Failed to fetch AI review data.",
       },
       { status: 500 },
     );
@@ -114,14 +114,14 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
   }
 
   try {
     const payload = await request.json();
 
     if (!payload || typeof payload.id === "undefined") {
-      return NextResponse.json({ success: false, error: "ID item wajib dikirim." }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Item ID is required." }, { status: 400 });
     }
 
     const externalEndpoint = process.env.NEXT_PUBLIC_AI_REVIEW_UPDATE_ENDPOINT || process.env.AI_REVIEW_STATUS_ENDPOINT || process.env.AI_REVIEW_ENDPOINT;
@@ -154,7 +154,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Gagal memperbarui status review AI.",
+        error: error.message || "Failed to update AI review status.",
       },
       { status: 500 },
     );
