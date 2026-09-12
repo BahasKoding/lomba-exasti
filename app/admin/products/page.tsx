@@ -17,27 +17,11 @@ import { Edit2 } from "lucide-react";
 export const dynamic = "force-dynamic"; // Ensure fresh data on admin dashboard
 
 export default async function ProductsPage() {
-  // Hardcoded data untuk test frontend sementara
-  const products = [
-    {
-      id: "prod_1",
-      name: "SmartCap Classic",
-      slug: "smartcap-classic",
-      price: 150000,
-      stockCount: 15,
-      status: "published",
-      imageUrl: "",
-    },
-    {
-      id: "prod_2",
-      name: "SmartCap Pro",
-      slug: "smartcap-pro",
-      price: 250000,
-      stockCount: 0,
-      status: "parked",
-      imageUrl: "",
-    }
-  ];
+  // Ambil data asli dari database (Turso), terbaru dulu
+  const products = await db
+    .select()
+    .from(productsTable)
+    .orderBy(desc(productsTable.createdAt));
 
   return (
     <div className="space-y-6">
