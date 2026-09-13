@@ -28,21 +28,33 @@ export const productsTable = sqliteTable("products", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
-// export const productVariantsTable = sqliteTable("product_variants", {
-//   id: integer("id").primaryKey({ autoIncrement: true }),
-//   productId: text("product_id")
-//     .notNull()
-//     .references(() => productsTable.id, { onDelete: "cascade" }),
-//   sku: text("sku").notNull().unique(),
-//   color: text("color").notNull(),
-//   sizeOrDiameter: text("size_or_diameter"),
-//   stockCount: integer("stock_count").default(0).notNull(),
-// });
+// Product Menu 
+export const productcatalogTable = sqliteTable("product_catalog", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  imageUrl: text("image_url"),
+  price: real("price").notNull(),
+  stockCount: integer("stock_count").default(0),
+  status: text("status").default("parked").notNull(),
+});
 
-// export const productFeaturesTable = sqliteTable("product_features", {
-//   id: integer("id").primaryKey({ autoIncrement: true }),
-//   productId: text("product_id")
-//     .notNull()
-//     .references(() => productsTable.id, { onDelete: "cascade" }),
-//   feature: text("feature").notNull(),
-// });
+// Varian produk: 1 produk bisa punya banyak varian warna/ukuran, stok per varian.
+export const productVariantsTable = sqliteTable("product_variants", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  productId: text("product_id")
+    .notNull()
+    .references(() => productsTable.id, { onDelete: "cascade" }), // hapus produk -> varian ikut terhapus
+  sku: text("sku").notNull().unique(),
+  color: text("color").notNull(),
+  sizeOrDiameter: text("size_or_diameter"),
+  stockCount: integer("stock_count").default(0).notNull(),
+});
+
+// Fitur/keunggulan produk (bullet points): 1 produk bisa punya banyak fitur.
+export const productFeaturesTable = sqliteTable("product_features", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  productId: text("product_id")
+    .notNull()
+    .references(() => productsTable.id, { onDelete: "cascade" }),
+  feature: text("feature").notNull(),
+});

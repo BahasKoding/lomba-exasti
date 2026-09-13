@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Eye, EyeOff, Edit2, Trash2, Loader } from "lucide-react";
+use client";
+
+import { useState, useEffect, useRef } from "react"; 
+import Link from "next/link"; 
+import { Button } from "@/components/ui/button"; 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge"; 
+import { RefreshCw, Eye, EyeOff, Edit2, Trash2, Loader, } from "lucide-react"; 
 
 const formatRupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 export default function ProductsPage() {
   const [mounted, setMounted] = useState(false);
@@ -17,68 +23,63 @@ export default function ProductsPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | "parked" | "published">("all");
+
+  const [productToDelete, setProductToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "parked" | "published"
+  >("all");
+
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [displaySettings, setDisplaySettings] = useState<{
     collectionProductIds: string[];
     bestSellerProductIds: string[];
-  }>({ collectionProductIds: [], bestSellerProductIds: [] });
+  }>({
+    collectionProductIds: [],
+    bestSellerProductIds: [],
+  });
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("smartcap_display_settings");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          setDisplaySettings({
-            collectionProductIds: Array.isArray(parsed.collectionProductIds) ? parsed.collectionProductIds : [],
-            bestSellerProductIds: Array.isArray(parsed.bestSellerProductIds) ? parsed.bestSellerProductIds : [],
-          });
-        }
-      } catch (e) {}
-    }
+
+    try {
+      const raw = localStorage.getItem("smartcap_display_settings");
+
+      if (raw) {
+        const parsed = JSON.parse(raw);
+
+        setDisplaySettings({
+          collectionProductIds: Array.isArray(parsed.collectionProductIds)
+            ? parsed.collectionProductIds
+            : [],
+          bestSellerProductIds: Array.isArray(parsed.bestSellerProductIds)
+            ? parsed.bestSellerProductIds
+            : [],
+        });
+      }
+    } catch {}
 
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowMobileFilter(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const toggleDisplaySection = (productId: string, section: "collectionProductIds" | "bestSellerProductIds") => {
-    setDeleteError(null);
-    setDisplaySettings((prev) => {
-      const currentList = prev[section];
-      const exists = currentList.includes(productId);
-
-      if (!exists && section === "collectionProductIds" && currentList.length >= 7) {
-        setDeleteError("Collection slots are full (Max 7 products). Remove or disable a product first.");
-        return prev;
-      }
-
-      const newList = exists
-        ? currentList.filter((id) => id !== productId)
-        : [...currentList, productId];
-
-      const updated = { ...prev, [section]: newList };
-      if (typeof window !== "undefined") {
-        localStorage.setItem("smartcap_display_settings", JSON.stringify(updated));
-        window.dispatchEvent(new Event("smartcap_display_updated"));
-      }
-      return updated;
-    });
-  };
-
-  const filteredProducts =
-    statusFilter === "all" ? products : products.filter((p) => p.status === statusFilter);
 
   useEffect(() => {
     loadProducts();
@@ -87,29 +88,64 @@ export default function ProductsPage() {
   async function loadProducts() {
     setLoadingProducts(true);
     setDeleteError(null);
+
     try {
-      const r = await fetch("/api/products");
+      const r = await fetch("/api/products", {
+        cache: "no-store",
+      });
+
       const d = await r.json();
-      if (d.success) setProducts(d.data);
+
+      if (d.success) {
+        setProducts(d.data);
+      } else {
+        setProducts([]);
+        setDeleteError(d.error || "Failed to load products.");
+      }
     } catch {
       setProducts([]);
+      setDeleteError("Failed to connect to product server.");
     } finally {
       setLoadingProducts(false);
     }
   }
 
   async function toggleStatus(product: any) {
-    const newStatus = product.status === "published" ? "parked" : "published";
+    const newStatus =
+      product.status === "published" ? "parked" : "published";
+
     setTogglingId(product.id);
+    setDeleteError(null);
+
     try {
       const res = await fetch("/api/products", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: product.id, status: newStatus }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: product.id,
+          status: newStatus,
+        }),
       });
+
       if (res.ok) {
-        setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, status: newStatus } : p)));
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === product.id
+              ? { ...p, status: newStatus }
+              : p
+          )
+        );
+      } else {
+        const data = await res.json().catch(() => ({}));
+
+        setDeleteError(
+          data.error || "Failed to update product status."
+        );
       }
+    } catch {
+      setDeleteError("Failed to update product status.");
     } finally {
       setTogglingId(null);
     }
@@ -117,32 +153,98 @@ export default function ProductsPage() {
 
   async function executeDelete(id: string) {
     setDeleteError(null);
-    // Save previous state in case deletion fails
+
     const previousProducts = [...products];
-    // Optimistically remove from state instantly
-    setProducts((prev) => prev.filter((p) => String(p.id) !== String(id)));
+
+    setProducts((prev) =>
+      prev.filter((p) => String(p.id) !== String(id))
+    );
+
     setDeletingId(id);
 
     try {
       const res = await fetch("/api/products", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ id }),
       });
+
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || (!data.success && !data.data)) {
-        // Rollback state if server deletion failed
+
+      if (!res.ok || !data.success) {
         setProducts(previousProducts);
-        setDeleteError(data.error || "Failed to delete product from database.");
+
+        setDeleteError(
+          data.error || "Failed to delete product from database."
+        );
       }
     } catch (err: any) {
-      // Rollback state on network failure
       setProducts(previousProducts);
-      setDeleteError(`Error deleting product: ${err.message || "Failed to reach server"}`);
+
+      setDeleteError(
+        `Error deleting product: ${
+          err.message || "Failed to reach server"
+        }`
+      );
     } finally {
       setDeletingId(null);
     }
   }
+
+  const toggleDisplaySection = (
+    productId: string,
+    section:
+      | "collectionProductIds"
+      | "bestSellerProductIds"
+  ) => {
+    setDeleteError(null);
+
+    setDisplaySettings((prev) => {
+      const currentList = prev[section];
+      const exists = currentList.includes(productId);
+
+      if (
+        !exists &&
+        section === "collectionProductIds" &&
+        currentList.length >= 7
+      ) {
+        setDeleteError(
+          "Collection slots are full (Max 7 products). Remove or disable a product first."
+        );
+
+        return prev;
+      }
+
+      const newList = exists
+        ? currentList.filter((id) => id !== productId)
+        : [...currentList, productId];
+
+      const updated = {
+        ...prev,
+        [section]: newList,
+      };
+
+      localStorage.setItem(
+        "smartcap_display_settings",
+        JSON.stringify(updated)
+      );
+
+      window.dispatchEvent(
+        new Event("smartcap_display_updated")
+      );
+
+      return updated;
+    });
+  };
+
+  const filteredProducts =
+    statusFilter === "all"
+      ? products
+      : products.filter(
+          (p) => p.status === statusFilter
+        );
 
   return (
     <div className="space-y-6 md:space-y-8">
