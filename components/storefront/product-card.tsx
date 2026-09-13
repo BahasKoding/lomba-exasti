@@ -77,7 +77,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300 cursor-pointer ${
             isAdded
               ? "bg-[#C4A265] border-[#C4A265] text-[#1B1C1E] scale-125 rotate-12 shadow-md"
-              : "border-[#353B2D] text-[#353B2D] hover:bg-[#353B2D] hover:text-white hover:scale-110 shadow-xs"
+              : "border-[#353B2D]/25 text-[#353B2D] hover:bg-[#353B2D] hover:text-white hover:scale-110 shadow-xs"
           }`}
           title="Tambah ke Keranjang"
         >

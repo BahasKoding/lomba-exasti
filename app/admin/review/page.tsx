@@ -31,7 +31,7 @@ export default function ReviewPage() {
   const router = useRouter();
   const [rows, setRows] = useState<ReviewRow[]>([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ReviewStatus>("Pending");
+  const [statusFilter, setStatusFilter] = useState<"all" | ReviewStatus>("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,6 +101,16 @@ export default function ReviewPage() {
     const loadDrafts = async () => {
       try {
         setIsLoading(true);
+        const savedRows = sessionStorage.getItem("smartcap_review_rows");
+        if (savedRows) {
+          const parsed = JSON.parse(savedRows);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setRows(parsed);
+            setIsLoading(false);
+            return;
+          }
+        }
+
         const raw = sessionStorage.getItem("drafts");
 
         if (raw) {
@@ -132,6 +142,9 @@ export default function ReviewPage() {
           });
 
           setRows(good);
+          try {
+            sessionStorage.setItem("smartcap_review_rows", JSON.stringify(good));
+          } catch (e) {}
         } else {
           // Fallback to mock/existing review data
           const fallbackData = await fetchReviewData();
@@ -146,6 +159,9 @@ export default function ReviewPage() {
             createdAt: new Date().toISOString(),
           }));
           setRows(mappedFallback);
+          try {
+            sessionStorage.setItem("smartcap_review_rows", JSON.stringify(mappedFallback));
+          } catch (e) {}
         }
       } catch (err: any) {
         setMessage({ text: `Failed to load review data: ${err.message}`, type: "error" });
@@ -157,11 +173,25 @@ export default function ReviewPage() {
     loadDrafts();
   }, []);
 
+  const updateRowsAndSync = (newRows: ReviewRow[] | ((prev: ReviewRow[]) => ReviewRow[])) => {
+    setRows((prev) => {
+      const updated = typeof newRows === "function" ? newRows(prev) : newRows;
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("smartcap_review_rows", JSON.stringify(updated));
+        } catch (e) {}
+      }
+      return updated;
+    });
+  };
+
   const updateRow = (index: number, field: keyof ReviewRow, value: any) => {
-    setRows((prev) =>
+    updateRowsAndSync((prev) =>
       prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
     );
   };
+
+  const approvedCount = useMemo(() => rows.filter((r) => r.status === "Approved").length, [rows]);
 
   // Filtered Rows Calculation
   const filteredRows = useMemo(() => {
@@ -169,7 +199,7 @@ export default function ReviewPage() {
       const matchesSearch =
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.description.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = item.status === statusFilter;
+      const matchesStatus = statusFilter === "all" ? true : item.status === statusFilter;
       
       let matchesDate = true;
       if (selectedDate !== "All" && item.createdAt) {
@@ -213,66 +243,9 @@ export default function ReviewPage() {
     );
   };
 
-  // Batch Action: Approve Selected Items
-  const handleApproveSelected = () => {
-    if (selectedIndices.length === 0) return;
-    const count = selectedIndices.length;
-    setRows((prev) =>
-      prev.map((row, idx) => (selectedIndices.includes(idx) ? { ...row, status: "Approved" } : row))
-    );
-    setSelectedIndices([]);
-    setMessage({
-      text: `✓ ${count} item(s) approved successfully!`,
-      type: "success",
-    });
-  };
-
-  // Batch Action: Reject Selected Items
-  const handleRejectSelected = () => {
-    if (selectedIndices.length === 0) return;
-    const count = selectedIndices.length;
-    setRows((prev) =>
-      prev.map((row, idx) => (selectedIndices.includes(idx) ? { ...row, status: "Rejected" } : row))
-    );
-    setSelectedIndices([]);
-    setMessage({
-      text: `✓ ${count} item(s) rejected.`,
-      type: "success",
-    });
-  };
-
-  // Batch Action: Move Selected Items to Pending
-  const handlePendingSelected = () => {
-    if (selectedIndices.length === 0) return;
-    const count = selectedIndices.length;
-    setRows((prev) =>
-      prev.map((row, idx) => (selectedIndices.includes(idx) ? { ...row, status: "Pending" } : row))
-    );
-    setSelectedIndices([]);
-    setMessage({
-      text: `✓ ${count} item(s) moved back to Pending.`,
-      type: "success",
-    });
-  };
-
-  // Batch Action: Save Selected (or All Non-Rejected) Items to Database
-  const handleSaveSelected = async () => {
-    // Exclude any item marked as Rejected, and filter by selectedIndices if items are explicitly checked
-    const targetRows = rows.filter((row, idx) => {
-      if (row.status === "Rejected") return false;
-      if (selectedIndices.length > 0) {
-        return selectedIndices.includes(idx);
-      }
-      return true;
-    });
-
-    if (!targetRows.length) {
-      setMessage({
-        text: "⚠️ No valid products to save. (Rejected items are automatically excluded)",
-        type: "error",
-      });
-      return;
-    }
+  // Helper to save products array directly to Turso Database
+  const saveProductsToDb = async (targetRows: ReviewRow[]) => {
+    if (!targetRows.length) return false;
     setIsSaving(true);
     setMessage(null);
 
@@ -298,16 +271,107 @@ export default function ReviewPage() {
         throw new Error(data.error ?? "Failed to save products to database.");
       }
 
-      sessionStorage.removeItem("drafts");
+      // Remove saved items from rows and sessionStorage
+      const targetIds = new Set(targetRows.map((r) => r.id));
+      updateRowsAndSync((prev) => {
+        const remaining = prev.filter((r) => !targetIds.has(r.id));
+        if (remaining.length === 0) {
+          sessionStorage.removeItem("drafts");
+          sessionStorage.removeItem("smartcap_review_rows");
+        }
+        return remaining;
+      });
+
+      setSelectedIndices([]);
       setMessage({
-        text: `✓ Successfully saved ${targetRows.length} product(s) to Turso database! Redirecting to catalog...`,
+        text: `✓ Successfully approved & saved ${targetRows.length} product(s) to Database! Redirecting to Product Directory...`,
         type: "success",
       });
-      setTimeout(() => router.push("/katalog"), 1500);
+
+      setTimeout(() => router.push("/admin/products"), 1200);
+      return true;
     } catch (err: any) {
-      setMessage({ text: `❌ ${err.message || "An error occurred while saving."}`, type: "error" });
+      setMessage({ text: `❌ ${err.message || "Failed to save products to database."}`, type: "error" });
+      return false;
+    } finally {
       setIsSaving(false);
     }
+  };
+
+  // Batch Action: Approve Selected Items & Save Directly to Database
+  const handleApproveSelected = async () => {
+    if (selectedIndices.length === 0) return;
+    const itemsToApprove = rows
+      .filter((_, idx) => selectedIndices.includes(idx))
+      .map((item) => ({ ...item, status: "Approved" as ReviewStatus }));
+
+    updateRowsAndSync((prev) =>
+      prev.map((row, idx) => (selectedIndices.includes(idx) ? { ...row, status: "Approved" } : row))
+    );
+
+    await saveProductsToDb(itemsToApprove);
+  };
+
+  // Single Item Action: Change status (and if Approved, save directly to Database)
+  const changeSingleStatus = async (realIndex: number, newStatus: ReviewStatus) => {
+    const targetItem = rows[realIndex];
+    if (!targetItem) return;
+
+    const updatedItem = { ...targetItem, status: newStatus };
+    updateRow(realIndex, "status", newStatus);
+
+    if (newStatus === "Approved") {
+      await saveProductsToDb([updatedItem]);
+    }
+  };
+
+  // Batch Action: Reject Selected Items
+  const handleRejectSelected = () => {
+    if (selectedIndices.length === 0) return;
+    const count = selectedIndices.length;
+    updateRowsAndSync((prev) =>
+      prev.map((row, idx) => (selectedIndices.includes(idx) ? { ...row, status: "Rejected" } : row))
+    );
+    setSelectedIndices([]);
+    setMessage({
+      text: `✓ ${count} item(s) rejected.`,
+      type: "success",
+    });
+  };
+
+  // Batch Action: Move Selected Items to Pending
+  const handlePendingSelected = () => {
+    if (selectedIndices.length === 0) return;
+    const count = selectedIndices.length;
+    updateRowsAndSync((prev) =>
+      prev.map((row, idx) => (selectedIndices.includes(idx) ? { ...row, status: "Pending" } : row))
+    );
+    setSelectedIndices([]);
+    setMessage({
+      text: `✓ ${count} item(s) moved back to Pending.`,
+      type: "success",
+    });
+  };
+
+  // Batch Action: Save All Approved/Non-Rejected Items to Database
+  const handleSaveSelected = async () => {
+    const targetRows = rows.filter((row, idx) => {
+      if (row.status === "Rejected") return false;
+      if (selectedIndices.length > 0) {
+        return selectedIndices.includes(idx);
+      }
+      return row.status === "Approved";
+    });
+
+    if (!targetRows.length) {
+      setMessage({
+        text: "⚠️ No products with status 'Approved' to save to database.",
+        type: "error",
+      });
+      return;
+    }
+
+    await saveProductsToDb(targetRows);
   };
 
   return (
@@ -383,81 +447,69 @@ export default function ReviewPage() {
             {selectedIndices.length > 0 ? (
               /* DYNAMIC ACTION BUTTONS (Context-aware based on active statusFilter) */
               <div className="flex flex-wrap items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-200">
-                {statusFilter === "Pending" && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleApproveSelected}
-                      className="flex h-10 w-28 items-center justify-center rounded-none bg-white text-xs font-extrabold text-[#1F2022] transition-all hover:bg-[#FCFAF7] shadow-2xs cursor-pointer"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleRejectSelected}
-                      className="flex h-10 w-28 items-center justify-center rounded-none bg-white text-xs font-extrabold text-[#1F2022] transition-all hover:bg-[#FCFAF7] shadow-2xs cursor-pointer"
-                    >
-                      Reject
-                    </button>
-                  </>
+                {(statusFilter === "all" || statusFilter === "Pending" || statusFilter === "Rejected") && (
+                  <button
+                    type="button"
+                    onClick={handleApproveSelected}
+                    disabled={isSaving}
+                    className="flex h-10 w-28 items-center justify-center gap-2 rounded-none bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 text-xs font-extrabold shadow-xs cursor-pointer disabled:opacity-50 transition-colors"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader className="h-4 w-4 animate-spin text-emerald-800" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>Approve</span>
+                    )}
+                  </button>
                 )}
 
-                {statusFilter === "Approved" && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePendingSelected}
-                      className="flex h-10 w-28 items-center justify-center rounded-none bg-white text-xs font-extrabold text-[#1F2022] transition-all hover:bg-[#FCFAF7] shadow-2xs cursor-pointer"
-                    >
-                      Pending
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleRejectSelected}
-                      className="flex h-10 w-28 items-center justify-center rounded-none bg-white text-xs font-extrabold text-[#1F2022] transition-all hover:bg-[#FCFAF7] shadow-2xs cursor-pointer"
-                    >
-                      Reject
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveSelected}
-                      disabled={isSaving}
-                      className="flex h-10 w-28 items-center justify-center gap-2 rounded-none bg-[#05A852] text-xs font-extrabold text-white transition-all hover:bg-[#048A43] shadow-md cursor-pointer disabled:opacity-50"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader className="h-4 w-4 animate-spin" />
-                          <span>Saving...</span>
-                        </>
-                      ) : (
-                        <span>Save</span>
-                      )}
-                    </button>
-                  </>
+                {(statusFilter === "all" || statusFilter === "Approved" || statusFilter === "Rejected") && (
+                  <button
+                    type="button"
+                    onClick={handlePendingSelected}
+                    className="flex h-10 w-28 items-center justify-center gap-2 rounded-none bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 text-xs font-extrabold shadow-xs cursor-pointer transition-colors"
+                  >
+                    Pending
+                  </button>
                 )}
 
-                {statusFilter === "Rejected" && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleApproveSelected}
-                      className="flex h-10 w-28 items-center justify-center rounded-none bg-white text-xs font-extrabold text-[#1F2022] transition-all hover:bg-[#FCFAF7] shadow-2xs cursor-pointer"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handlePendingSelected}
-                      className="flex h-10 w-28 items-center justify-center rounded-none bg-white text-xs font-extrabold text-[#1F2022] transition-all hover:bg-[#FCFAF7] shadow-2xs cursor-pointer"
-                    >
-                      Pending
-                    </button>
-                  </>
+                {(statusFilter === "all" || statusFilter === "Pending" || statusFilter === "Approved") && (
+                  <button
+                    type="button"
+                    onClick={handleRejectSelected}
+                    className="flex h-10 w-28 items-center justify-center gap-2 rounded-none bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 text-xs font-extrabold shadow-xs cursor-pointer transition-colors"
+                  >
+                    Reject
+                  </button>
                 )}
               </div>
             ) : (
               /* SEARCH BAR, DATE PICKER & 3-DOTS MENU (Matches Wireframe 100%) */
               <div className="flex flex-1 items-center gap-2 animate-in fade-in duration-200">
+                {approvedCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSaveSelected}
+                    disabled={isSaving}
+                    className="flex h-8 items-center justify-center gap-1.5 rounded-none bg-[#05A852] px-3 text-[10px] sm:text-xs font-extrabold text-white transition-all hover:bg-[#048A43] shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
+                    title="Save products with Approved status to Database"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader className="h-3 w-3 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5 stroke-[3]" />
+                        <span>Save to Database ({approvedCount})</span>
+                      </>
+                    )}
+                  </button>
+                )}
+
                 {/* Search Input */}
                 <div className="relative flex-1 min-w-[100px]">
                   <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#94908C]" />
@@ -477,7 +529,7 @@ export default function ReviewPage() {
                     onClick={() => setIsDateDropdownOpen((prev) => !prev)}
                     className="flex h-8 items-center justify-between gap-2 rounded-none border border-transparent bg-white px-3 text-[10px] sm:text-xs font-extrabold text-[#1F2022] cursor-pointer hover:bg-[#FCFAF7] whitespace-nowrap"
                   >
-                    <span>{selectedDate === "All" ? "Semua Tanggal" : selectedDate}</span>
+                    <span>{selectedDate === "All" ? "All Dates" : selectedDate}</span>
                   </button>
 
                   {/* Dropdown Popover List */}
@@ -493,12 +545,15 @@ export default function ReviewPage() {
                           selectedDate === "All" ? "bg-[#D8D4CD] text-[#1F2022] font-black" : "text-[#1F2022]"
                         }`}
                       >
-                        <span>Semua Tanggal</span>
-                        <span className="text-[10px] opacity-70">({rows.length})</span>
+                        <span>All Dates</span>
+                        <span className="text-[10px] opacity-70">
+                          ({rows.filter((r) => statusFilter === "all" || r.status === statusFilter).length})
+                        </span>
                       </button>
 
                       {availableDates.map((dateStr) => {
                         const countForDate = rows.filter((r) => {
+                          if (statusFilter !== "all" && r.status !== statusFilter) return false;
                           if (!r.createdAt) return false;
                           const d = new Date(r.createdAt);
                           const day = String(d.getDate()).padStart(2, "0");
@@ -539,8 +594,8 @@ export default function ReviewPage() {
                   </button>
                   
                   {isStatusFilterDropdownOpen && (
-                    <div className="absolute right-0 top-10 z-50 min-w-[120px] rounded-none border border-[#DED9CF] bg-white shadow-xl animate-in fade-in zoom-in-95 duration-150">
-                      {(["Pending", "Approved", "Rejected"] as ReviewStatus[]).map((st) => (
+                    <div className="absolute right-0 top-10 z-50 min-w-[130px] rounded-none border border-[#DED9CF] bg-white shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                      {(["all", "Pending", "Approved", "Rejected"] as const).map((st) => (
                         <button
                           key={st}
                           type="button"
@@ -548,11 +603,11 @@ export default function ReviewPage() {
                             setStatusFilter(st);
                             setIsStatusFilterDropdownOpen(false);
                           }}
-                          className={`w-full text-center px-4 py-2 text-[10px] sm:text-xs font-bold border-b border-[#E5E2DC] last:border-0 transition-colors cursor-pointer ${
+                          className={`w-full text-center px-4 py-2 text-[10px] sm:text-xs font-bold border-b border-[#E5E2DC] last:border-0 transition-colors cursor-pointer capitalize ${
                             statusFilter === st ? "bg-[#E5E2DC] text-[#1F2022]" : "text-[#1F2022] hover:bg-[#FCFAF7]"
                           }`}
                         >
-                          {st}
+                          {st === "all" ? "All" : st} ({st === "all" ? rows.length : rows.filter((r) => r.status === st).length})
                         </button>
                       ))}
                     </div>
@@ -560,6 +615,28 @@ export default function ReviewPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Visible Status Filter Tabs Bar */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#DED9CF]">
+            {(["all", "Pending", "Approved", "Rejected"] as const).map((st) => {
+              const count = st === "all" ? rows.length : rows.filter((r) => r.status === st).length;
+              const active = statusFilter === st;
+              return (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setStatusFilter(st)}
+                  className={`rounded-none px-3.5 py-1 text-xs font-bold transition-all cursor-pointer capitalize ${
+                    active
+                      ? "bg-[#1F2022] text-[#FCFAF7] font-extrabold shadow-2xs"
+                      : "bg-white border border-[#DED9CF] text-[#94908C] hover:border-[#1F2022] hover:text-[#1F2022]"
+                  }`}
+                >
+                  {st === "all" ? "All" : st} ({count})
+                </button>
+              );
+            })}
           </div>
 
         </div>
@@ -652,7 +729,7 @@ export default function ReviewPage() {
                                 <button
                                   type="button"
                                   onClick={() => setOpenStatusIndex(openStatusIndex === realIndex ? null : realIndex)}
-                                  className={`flex items-center justify-center rounded-xl px-2 py-0.5 text-[9px] font-bold transition-transform cursor-pointer ${
+                                  className={`flex items-center justify-center rounded-none px-2 py-0.5 text-[9px] font-bold transition-transform cursor-pointer ${
                                     row.status === "Approved"
                                       ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                                       : row.status === "Rejected"
@@ -670,7 +747,7 @@ export default function ReviewPage() {
                                         key={statusOption}
                                         type="button"
                                         onClick={() => {
-                                          updateRow(realIndex, "status", statusOption);
+                                          changeSingleStatus(realIndex, statusOption);
                                           setOpenStatusIndex(null);
                                         }}
                                         className={`w-full text-left px-2 py-1 text-[9px] font-extrabold transition-colors cursor-pointer flex items-center justify-between ${
@@ -722,8 +799,8 @@ export default function ReviewPage() {
               return (
                 <div
                   key={realIndex}
-                  className={`relative flex flex-col overflow-hidden rounded-none border bg-white p-6 transition-all space-y-4 ${
-                    isChecked ? "border-[#353B2D] shadow-xs" : "border-[#DED9CF]"
+                  className={`relative flex flex-col overflow-hidden rounded-none border bg-white p-5 transition-all space-y-4 shadow-xs hover:shadow-md ${
+                    isChecked ? "border-[#353B2D] ring-1 ring-[#353B2D]" : "border-[#E5E2DC]"
                   }`}
                 >
                   {/* Top-Left Square Checkbox & Status Selector */}
@@ -746,12 +823,12 @@ export default function ReviewPage() {
                       <button
                         type="button"
                         onClick={() => setOpenStatusIndex(openStatusIndex === realIndex ? null : realIndex)}
-                        className={`flex items-center gap-1.5 rounded-none px-3 py-1 text-[11px] font-extrabold transition-transform active:scale-95 cursor-pointer shadow-2xs ${
+                        className={`flex items-center gap-1.5 rounded-none px-3 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${
                           row.status === "Approved"
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200"
+                            ? "bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]"
                             : row.status === "Rejected"
-                            ? "bg-red-100 text-red-800 border border-red-300 hover:bg-red-200"
-                            : "bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200"
+                            ? "bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF]"
+                            : "bg-[#FFF8E7] text-[#B8871E] border border-[#F5E6B8]"
                         }`}
                       >
                         <span>{row.status}</span>
@@ -765,17 +842,17 @@ export default function ReviewPage() {
                               key={statusOption}
                               type="button"
                               onClick={() => {
-                                updateRow(realIndex, "status", statusOption);
+                                changeSingleStatus(realIndex, statusOption);
                                 setOpenStatusIndex(null);
                               }}
                               className={`w-full text-left px-3 py-1.5 text-[11px] font-extrabold transition-colors cursor-pointer flex items-center justify-between ${
                                 row.status === statusOption
-                                  ? "bg-[#D8D4CD] text-[#1F2022] font-black"
+                                  ? "bg-[#E5E2DC] text-[#1F2022] font-black"
                                   : statusOption === "Approved"
-                                  ? "text-emerald-800 hover:bg-emerald-50"
+                                  ? "text-[#137333] hover:bg-[#E6F4EA]"
                                   : statusOption === "Rejected"
-                                  ? "text-red-800 hover:bg-red-50"
-                                  : "text-amber-800 hover:bg-amber-50"
+                                  ? "text-[#C5221F] hover:bg-[#FCE8E6]"
+                                  : "text-[#B8871E] hover:bg-[#FFF8E7]"
                               }`}
                             >
                               <span>{statusOption}</span>
@@ -787,29 +864,36 @@ export default function ReviewPage() {
                     </div>
                   </div>
 
-                  {/* Photo Display Box (Strictly 0 Corner Radius: rounded-none) */}
-                  <div className="relative group h-48 w-full overflow-hidden rounded-none border border-[#E5E2DC] bg-[#F5F2ED] flex items-center justify-center">
+                  {/* Photo Display Box (Clean & Minimalist) */}
+                  <div className="relative group h-48 w-full overflow-hidden rounded-none border border-[#E5E2DC] bg-[#F9F8F6] flex items-center justify-center">
                     {imgSrc ? (
                       <>
                         <img src={imgSrc} alt={row.name} className="h-full w-full object-cover" />
                         <button
                           type="button"
                           onClick={() => setLightbox({ src: imgSrc, title: row.name })}
-                          className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity text-white cursor-pointer"
+                          className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white cursor-pointer"
                         >
                           <Maximize2 className="h-5 w-5" />
                         </button>
                       </>
                     ) : (
-                      <span className="text-4xl">🧢</span>
+                      <div className="flex flex-col items-center justify-center text-[#94908C] gap-2">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-none bg-[#1F2022] text-white shadow-xs">
+                          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white text-white">
+                            <polygon points="12 5 19 18 5 18" fill="currentColor" />
+                          </svg>
+                        </div>
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#94908C]">SmartCap Showcase</span>
+                      </div>
                     )}
                   </div>
 
-                  {/* Product Name & Price Editable Row (Wireframe Layout) */}
+                  {/* Product Name & Price Editable Row */}
                   <div className="grid grid-cols-2 gap-4 pt-1">
                     {/* Product Name Field */}
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-bold text-[#1F2022]">Product Name</label>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-[#94908C]">Product Name</label>
                       <div className="relative flex items-center">
                         <input
                           type="text"
@@ -817,33 +901,33 @@ export default function ReviewPage() {
                           onChange={(e) => updateRow(realIndex, "name", e.target.value)}
                           className="w-full border-b border-[#DED9CF] bg-transparent pb-1 pr-6 text-xs font-bold text-[#1F2022] outline-none focus:border-[#353B2D]"
                         />
-                        <Pencil className="pointer-events-none absolute right-0 bottom-1.5 h-3.5 w-3.5 text-[#1F2022]/60" />
+                        <Pencil className="pointer-events-none absolute right-0 bottom-1.5 h-3.5 w-3.5 text-[#1F2022]/40" />
                       </div>
                     </div>
 
-                    {/* Price Field */}
+                    {/* Price Field (Browser Stepper Arrows Hidden for Clean Display) */}
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-bold text-[#1F2022]">Price</label>
+                      <label className="block text-[10px] font-black uppercase tracking-wider text-[#94908C]">Price</label>
                       <div className="flex items-center gap-1 border-b border-[#DED9CF] pb-1 focus-within:border-[#353B2D]">
                         <span className="text-xs font-bold text-[#1F2022]">Rp.</span>
                         <input
                           type="number"
                           value={row.priceEstimate}
                           onChange={(e) => updateRow(realIndex, "priceEstimate", Number(e.target.value))}
-                          className="w-full bg-transparent text-xs font-extrabold text-[#1F2022] outline-none"
+                          className="w-full bg-transparent text-xs font-extrabold text-[#1F2022] outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Description Box (Strictly 0 Corner Radius: rounded-none) */}
+                  {/* Description Box */}
                   <div className="space-y-1.5 pt-1">
-                    <label className="block text-[11px] font-bold text-[#1F2022]">Description</label>
+                    <label className="block text-[10px] font-black uppercase tracking-wider text-[#94908C]">Description</label>
                     <textarea
                       value={row.description}
                       onChange={(e) => updateRow(realIndex, "description", e.target.value)}
                       rows={4}
-                      className="w-full rounded-none border border-[#DED9CF] bg-white p-3.5 text-xs text-[#1F2022] leading-relaxed outline-none focus:border-[#353B2D] resize-y font-normal"
+                      className="w-full rounded-none border border-[#E5E2DC] bg-[#FCFAF7] p-3 text-xs text-[#1F2022] leading-relaxed outline-none focus:border-[#353B2D] focus:bg-white resize-y font-medium transition-colors"
                       placeholder="AI generated description..."
                     />
                   </div>
@@ -960,7 +1044,7 @@ export default function ReviewPage() {
                                   key={statusOption}
                                   type="button"
                                   onClick={() => {
-                                    updateRow(realIndex, "status", statusOption);
+                                    changeSingleStatus(realIndex, statusOption);
                                     setOpenStatusIndex(null);
                                   }}
                                   className={`w-full text-left px-3 py-1.5 text-[11px] font-extrabold transition-colors cursor-pointer flex items-center justify-between ${

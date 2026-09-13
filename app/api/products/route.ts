@@ -18,20 +18,20 @@ export const dynamic = "force-dynamic";
 export async function PATCH(request: Request) {
     const user = await getSessionUser();
     if (!user) {
-        return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+        return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
     }
 
     let body: { id?: string; status?: string };
     try {
         body = await request.json();
     } catch {
-        return NextResponse.json({ error: "Body bukan JSON valid." }, { status: 400 });
+        return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
     }
 
     const { id, status } = body;
     // validasi ketat: hanya dua nilai yang diterima — jangan biarkan string aneh masuk DB
     if (!id || (status !== "parked" && status !== "published")) {
-        return NextResponse.json({ error: "Field 'id' dan 'status' (parked|published) wajib benar." }, { status: 400 });
+        return NextResponse.json({ error: "Fields 'id' and 'status' (parked|published) are required." }, { status: 400 });
     }
 
     try {
@@ -42,12 +42,12 @@ export async function PATCH(request: Request) {
             .returning();
 
         if (updated.length === 0) {
-            return NextResponse.json({ error: "Produk tidak ditemukan." }, { status: 404 });
+            return NextResponse.json({ error: "Product not found." }, { status: 404 });
         }
 
         return NextResponse.json({ success: true, data: updated[0] });
     } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message ?? "Gagal update." }, { status: 500 });
+        return NextResponse.json({ success: false, error: error.message ?? "Failed to update product." }, { status: 500 });
     }
 }
 
@@ -55,7 +55,7 @@ export async function PATCH(request: Request) {
 export async function GET() {
     const user = await getSessionUser();
     if (!user) {
-        return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+        return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
     }
 
     try {
@@ -63,7 +63,7 @@ export async function GET() {
         return NextResponse.json({ success: true, data: all });
     } catch (error: any) {
         return NextResponse.json(
-            { success: false, error: error.message ?? "Gagal memuat produk." },
+            { success: false, error: error.message ?? "Failed to load products." },
             { status: 500 },
         );
     }
@@ -72,7 +72,7 @@ export async function GET() {
 export async function POST(request: Request) {
     const user = await getSessionUser();
     if (!user) {
-        return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+        return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
     }
 
     let body: {
@@ -91,16 +91,14 @@ export async function POST(request: Request) {
     try {
         body = await request.json();
     } catch {
-        return NextResponse.json({ error: "Body bukan JSON valid." }, { status: 400 });
+        return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
     }
 
     const items = body.products;
     if (!Array.isArray(items) || items.length === 0) {
-        return NextResponse.json({ error: "Field 'products' wajib berisi minimal 1 item." }, { status: 400 });
+        return NextResponse.json({ error: "Field 'products' must contain at least 1 item." }, { status: 400 });
     }
 
-    // BUG-BE-004 fix: validasi SETIAP item sebelum disentuh slugify/insert,
-    // supaya payload invalid dapat 4xx terstruktur, bukan 500 + exception bocor
     for (const item of items) {
         if (
             !item?.name || typeof item.name !== "string" ||
@@ -109,7 +107,7 @@ export async function POST(request: Request) {
             typeof item.price !== "number" || !Number.isFinite(item.price) || item.price < 0
         ) {
             return NextResponse.json(
-                { error: "Setiap produk wajib punya 'name', 'category', 'description' (string), dan 'price' (number >= 0)." },
+                { error: "Each product must have 'name', 'category', 'description' (string), and 'price' (number >= 0)." },
                 { status: 400 },
             );
         }

@@ -124,7 +124,7 @@ export default function CartPage() {
 
   const handleOrderWhatsApp = () => {
     if (selectedItems.length === 0) return;
-    let message = `Halo SmartCap Studio, saya ingin memesan dari Cart:\n\n`;
+    let message = `Hello SmartCap Studio, I would like to order from Cart:\n\n`;
     selectedItems.forEach((item, idx) => {
       message += `${idx + 1}. ${item.name} (${item.color || "Default"}) x${item.quantity} - ${formatPrice(item.price * item.quantity)}\n`;
     });
@@ -140,8 +140,8 @@ export default function CartPage() {
         <div className="relative flex items-center justify-center mb-6">
           <Link
             href="/katalog"
-            aria-label="Kembali ke Katalog"
-            title="Kembali ke Katalog"
+            aria-label="Back to Catalog"
+            title="Back to Catalog"
             className="absolute left-0 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-none text-[#1B1C1E] hover:bg-black/5 transition cursor-pointer"
           >
             <ArrowLeft className="h-6 w-6 stroke-[2.2]" />
@@ -211,7 +211,7 @@ export default function CartPage() {
                     <button
                       type="button"
                       onClick={() => toggleSelectItem(item.id)}
-                      aria-label={`Pilih ${item.name}`}
+                      aria-label={`Select ${item.name}`}
                       className="flex h-5 w-5 shrink-0 items-center justify-center rounded-none border border-[#1B1C1E] transition cursor-pointer"
                     >
                       <div
@@ -267,8 +267,8 @@ export default function CartPage() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.id)}
-                      aria-label={`Hapus ${item.name}`}
-                      title="Hapus dari keranjang"
+                      aria-label={`Remove ${item.name}`}
+                      title="Remove from cart"
                       className="p-2 text-[#1B1C1E] hover:text-red-600 transition cursor-pointer shrink-0"
                     >
                       <Trash2 className="h-5 w-5 stroke-[2]" />
@@ -278,32 +278,16 @@ export default function CartPage() {
               })}
             </div>
 
-            {/* ── 1. INLINE ORDER BUTTON (Right under item rows box, 100% visible in page flow) ── */}
+            {/* ── FLOATING POP-UP ORDER BUTTON (With Glassmorphism Backdrop Blur & Glowing Outline) ── */}
             {hasSelected && (
-              <div className="mt-6 w-full">
-                <button
-                  type="button"
-                  onClick={handleOrderWhatsApp}
-                  className="w-full rounded-none bg-[#353B2D] hover:bg-[#C4A265] hover:text-[#1B1C1E] py-4 text-center text-base font-black uppercase tracking-wider text-white shadow-md transition-all duration-300 cursor-pointer"
-                >
-                  Order ({selectedCount})
-                </button>
-              </div>
-            )}
-
-            {/* ── 2. FIXED STICKY BOTTOM BAR (Floating at screen bottom edge when scrolling) ── */}
-            {hasSelected && (
-              <div
-                className="fixed bottom-0 left-0 right-0 z-[9999] bg-[#F7F6F2]/95 backdrop-blur-md border-t border-[#DED9CF] p-4 shadow-2xl transition-all duration-300"
-                style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 9999 }}
-              >
-                <div className="max-w-4xl mx-auto">
+              <div className="fixed bottom-6 left-0 right-0 z-[9999] pointer-events-none px-4 flex justify-center">
+                <div className="w-full max-w-4xl pointer-events-auto">
                   <button
                     type="button"
                     onClick={handleOrderWhatsApp}
-                    className="w-full rounded-none bg-[#353B2D] hover:bg-[#C4A265] hover:text-[#1B1C1E] py-4 text-center text-base font-black uppercase tracking-wider text-white shadow-md transition-all duration-300 cursor-pointer"
+                    className="w-full rounded-none bg-[#353B2D]/85 backdrop-blur-md backdrop-saturate-150 border-2 border-[#C4A265]/80 shadow-[0_12px_40px_rgba(0,0,0,0.5)] hover:bg-[#C4A265] hover:border-[#C4A265] hover:text-[#1B1C1E] py-4 text-center text-base font-black uppercase tracking-widest text-white transition-all duration-300 cursor-pointer active:scale-[0.99] flex items-center justify-center gap-2"
                   >
-                    Order ({selectedCount})
+                    <span>ORDER ({selectedCount})</span>
                   </button>
                 </div>
               </div>

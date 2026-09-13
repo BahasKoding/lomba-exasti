@@ -3,14 +3,14 @@ import { getSessionUser } from "@/lib/auth";
 
 const buildAiResult = (fileName: string, index: number) => {
   const cleanName = fileName.split(".")[0].replace(/[-_]+/g, " ");
-  const baseName = cleanName || `Produk ${index + 1}`;
+  const baseName = cleanName || `Product ${index + 1}`;
 
   return {
     id: Date.now() + index,
     name: baseName,
     category: index % 2 === 0 ? "Baseball Cap" : "Bucket Hat",
     material: index % 3 === 0 ? "Cotton Twill" : index % 3 === 1 ? "Canvas" : "Polyester",
-    description: `Hasil generate AI untuk ${baseName}. Produk ini dirancang dengan tampilan modern, bahan yang nyaman dipakai, dan cocok untuk kebutuhan daily wear maupun aktivitas santai.`,
+    description: `AI generated description for ${baseName}. Designed with a modern aesthetic, premium comfort, and tailored for daily casual wear.`,
     status: "Pending",
     createdAt: new Date().toISOString().slice(0, 10),
   };
@@ -26,7 +26,7 @@ const normalizeUploadData = (payload: any, fallbackFiles: File[]) => {
     if (Array.isArray(candidate)) {
       return candidate.map((item, index) => ({
         id: item?.id ?? item?.productId ?? item?.product_id ?? item?.uuid ?? `${Date.now()}-${index}`,
-        name: item?.name ?? item?.product_name ?? item?.title ?? item?.productName ?? `Produk ${index + 1}`,
+        name: item?.name ?? item?.product_name ?? item?.title ?? item?.productName ?? `Product ${index + 1}`,
         category: item?.category ?? item?.category_name ?? item?.type ?? item?.productCategory ?? "Uncategorized",
         material: item?.material ?? item?.material_name ?? item?.fabric ?? item?.rawMaterial ?? "Unknown",
         description: item?.description ?? item?.ai_description ?? item?.generated_description ?? item?.summary ?? item?.detail ?? "",
@@ -51,7 +51,7 @@ const normalizeUploadData = (payload: any, fallbackFiles: File[]) => {
 export async function POST(request: Request) {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Tidak terautentikasi." }, { status: 401 });
+    return NextResponse.json({ error: "Unauthenticated." }, { status: 401 });
   }
 
   try {
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const files = formData.getAll("files").filter((file) => file instanceof File);
 
     if (!files.length) {
-      return NextResponse.json({ success: false, error: "Tidak ada file yang dikirim." }, { status: 400 });
+      return NextResponse.json({ success: false, error: "No files uploaded." }, { status: 400 });
     }
 
     const externalEndpoint = process.env.NEXT_PUBLIC_AI_UPLOAD_ENDPOINT || process.env.AI_UPLOAD_ENDPOINT;
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Gagal memproses upload AI.",
+        error: error.message || "Failed to process AI upload.",
       },
       { status: 500 },
     );

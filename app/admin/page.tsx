@@ -3,12 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, AlertCircle, Loader, X, Info, RefreshCw, Trash2, Eye, EyeOff } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
-const formatRupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+import { UploadCloud, AlertCircle, Loader, X, Info } from "lucide-react";
 
 async function fileToItem(file: File) {
   const imageBase64 = await new Promise<string>((resolve, reject) => {
@@ -33,22 +28,11 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [progressMessage, setProgressMessage] = useState<string | null>(null);
 
-  // --- Product Directory State & Handlers ---
-  const [products, setProducts] = useState<any[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | "parked" | "published">("all");
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const infoPopupMobileRef = useRef<HTMLDivElement>(null);
   const infoPopupDesktopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowMobileFilter(false);
-      }
       if (
         infoPopupMobileRef.current &&
         !infoPopupMobileRef.current.contains(event.target as Node) &&
@@ -63,66 +47,6 @@ export default function AdminDashboard() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const filteredProducts =
-    statusFilter === "all" ? products : products.filter((p) => p.status === statusFilter);
-
-  useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((d) => setProducts(d.success ? d.data : []))
-      .catch(() => setProducts([]))
-      .finally(() => setLoadingProducts(false));
-  }, []);
-
-  async function loadProducts() {
-    setLoadingProducts(true);
-    try {
-      const r = await fetch("/api/products");
-      const d = await r.json();
-      if (d.success) setProducts(d.data);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }
-
-  async function toggleStatus(product: any) {
-    const newStatus = product.status === "published" ? "parked" : "published";
-    setTogglingId(product.id);
-    try {
-      const res = await fetch("/api/products", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: product.id, status: newStatus }),
-      });
-      if (res.ok) {
-        setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, status: newStatus } : p)));
-      }
-    } finally {
-      setTogglingId(null);
-    }
-  }
-
-  async function deleteProduct(id: string) {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-    setDeletingId(id);
-    try {
-      const res = await fetch("/api/products", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      if (res.ok) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-      } else {
-        alert("Failed to delete product.");
-      }
-    } catch {
-      alert("Error deleting product.");
-    } finally {
-      setDeletingId(null);
-    }
-  }
 
   // --- Image Preview Object URLs ---
   const previewUrls = useMemo(() => {
@@ -443,187 +367,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* 3. Product Directory Table */}
-      <div className="overflow-hidden rounded-none border border-transparent md:border-[#E5E2DC] bg-[#D8D4CD]/40 md:bg-[#FFFFFF] shadow-none md:shadow-xs p-5 md:p-0">
-        <div className="space-y-5 md:space-y-6 md:p-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[#1F2022]">Product Directory</h2>
-                <p className="mt-1 text-[11px] md:text-sm text-[#1F2022]/90 md:text-[#94908C]">
-                  Products marked as <span className="font-bold text-[#1F2022]">Parked</span> are hidden from the public storefront publication control is in your hands.
-                </p>
-              </div>
-              
-              {/* Vertical Dots Icon (Mobile) with Dropdown */}
-              <div className="md:hidden relative" ref={dropdownRef}>
-                <button 
-                  type="button" 
-                  onClick={() => setShowMobileFilter(!showMobileFilter)}
-                  className="flex h-7 w-7 items-center justify-center bg-transparent border-none outline-none cursor-pointer"
-                >
-                  <svg className="w-5 h-5 text-[#1F2022]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                  </svg>
-                </button>
 
-                {/* Dropdown Menu (Mobile Only) */}
-                {showMobileFilter && (
-                  <div className="absolute right-0 top-full mt-2 z-50 w-48 rounded-none border border-[#E5E2DC] bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200">
-                    <div className="flex flex-col py-2">
-                      <span className="px-4 py-2 text-xs font-bold text-[#94908C] uppercase tracking-wider">Filter Status</span>
-                      {(["all", "parked", "published"] as const).map((f) => {
-                        const count = f === "all" ? products.length : products.filter((p) => p.status === f).length;
-                        const active = statusFilter === f;
-                        return (
-                          <button
-                            key={f}
-                            onClick={() => {
-                              setStatusFilter(f);
-                              setShowMobileFilter(false);
-                            }}
-                            className={`flex justify-between items-center px-4 py-2 text-xs font-bold text-left transition cursor-pointer capitalize ${
-                              active
-                                ? "bg-[#1F2022] text-[#FCFAF7]"
-                                : "text-[#1F2022] hover:bg-[#FCFAF7]"
-                            }`}
-                          >
-                            <span>{f === "all" ? "All" : f}</span>
-                            <span className={active ? "text-white" : "text-[#94908C]"}>({count})</span>
-                          </button>
-                        );
-                      })}
-                      <div className="border-t border-[#E5E2DC] mt-1 pt-1">
-                        <button
-                          onClick={() => {
-                            loadProducts();
-                            setShowMobileFilter(false);
-                          }}
-                          className="flex w-full items-center gap-2 px-4 py-2 text-xs font-bold text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer"
-                        >
-                          <RefreshCw className={`h-3.5 w-3.5 ${loadingProducts ? "animate-spin" : ""}`} />
-                          Refresh List
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadProducts}
-              disabled={loadingProducts}
-              className="hidden md:flex gap-2 rounded-none border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7] cursor-pointer text-xs font-bold"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${loadingProducts ? "animate-spin" : ""}`} />
-              Refresh List
-            </Button>
-          </div>
-
-          {/* Status filter tabs (Desktop Only) */}
-          <div className="hidden md:flex gap-2">
-            {(["all", "parked", "published"] as const).map((f) => {
-              const count = f === "all" ? products.length : products.filter((p) => p.status === f).length;
-              const active = statusFilter === f;
-              return (
-                <button
-                  key={f}
-                  onClick={() => setStatusFilter(f)}
-                  className={`rounded-none px-4 py-1.5 text-xs font-bold transition cursor-pointer capitalize ${active
-                      ? "bg-[#1F2022] text-[#FCFAF7]"
-                      : "border border-[#E5E2DC] text-[#94908C] hover:border-[#1F2022] hover:text-[#1F2022]"
-                    }`}
-                >
-                  {f === "all" ? "All" : f} ({count})
-                </button>
-              );
-            })}
-          </div>
-
-          {loadingProducts ? (
-            <p className="py-8 text-center text-sm font-semibold text-[#94908C]">Loading product directory...</p>
-          ) : filteredProducts.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[#94908C]">
-              {products.length === 0
-                ? "No products saved yet. Upload your first product photos above."
-                : "No products found with this status."}
-            </p>
-          ) : (
-            <div className="overflow-x-auto rounded-none border-none md:border md:border-[#E5E2DC] bg-white p-4 md:p-0">
-              <Table className="min-w-full table-auto">
-                <TableHeader>
-                  <TableRow className="bg-transparent md:bg-[#FCFAF7] border-b-0 md:border-b">
-                    <TableHead className="pl-0 md:pl-4 font-bold text-[#1F2022] text-[11px] md:text-sm">Photo</TableHead>
-                    <TableHead className="font-bold text-[#1F2022] text-[11px] md:text-sm">Name</TableHead>
-                    <TableHead className="font-bold text-[#1F2022] text-[11px] md:text-sm">Price</TableHead>
-                    <TableHead className="font-bold text-[#1F2022] text-[11px] md:text-sm">Status</TableHead>
-                    <TableHead className="pr-0 md:pr-4 text-right font-bold text-[#1F2022] text-[11px] md:text-sm">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProducts.map((p) => (
-                    <TableRow key={p.id} className="border-b-0 md:border-b">
-                      <TableCell className="pl-0 md:pl-4 py-2 md:py-4">
-                        {p.imageUrl ? (
-                          <img
-                            src={p.imageUrl}
-                            alt={p.name}
-                            className="h-10 w-10 md:h-12 md:w-12 rounded-none border border-transparent md:border-[#E5E2DC] object-cover bg-gray-400"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-none border border-transparent md:border-[#E5E2DC] bg-[#898989] text-lg">
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-bold text-[#1F2022] text-[10px] md:text-sm py-2 md:py-4 truncate max-w-[80px] md:max-w-none">{p.name}</TableCell>
-                      <TableCell className="font-extrabold text-[#1F2022] text-[10px] md:text-sm py-2 md:py-4">{formatRupiah(p.price)}</TableCell>
-                      <TableCell className="py-2 md:py-4">
-                        <Badge
-                          className={
-                            p.status === "published"
-                              ? "rounded-none bg-emerald-100 text-emerald-800 hover:bg-emerald-100 font-bold border border-emerald-300 text-[9px] md:text-xs px-1 md:px-2.5 py-0 md:py-0.5"
-                              : "rounded-none bg-amber-100 text-amber-800 hover:bg-amber-100 font-bold border border-amber-300 text-[9px] md:text-xs px-1 md:px-2.5 py-0 md:py-0.5"
-                          }
-                        >
-                          {p.status === "published" ? "Published" : "Parked"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="pr-0 md:pr-4 text-right py-2 md:py-4">
-                        <div className="flex items-center justify-end gap-1 md:gap-2">
-                          <Button
-                            size="sm"
-                            variant={p.status === "published" ? "outline" : "default"}
-                            disabled={togglingId === p.id || deletingId === p.id}
-                            onClick={() => toggleStatus(p)}
-                            className={`rounded-none px-1.5 md:px-3 h-6 md:h-9 text-[9px] md:text-xs font-bold cursor-pointer gap-1 md:gap-1.5 ${
-                              p.status === "published"
-                                ? "border-[#E5E2DC] text-[#1F2022] hover:bg-[#FCFAF7]"
-                                : "bg-[#1F2022] text-[#FCFAF7] hover:bg-[#1F2022]/90"
-                              }`}
-                          >
-                            {togglingId === p.id ? (
-                              <Loader className="h-3 w-3 md:h-3.5 md:w-3.5 animate-spin" />
-                            ) : p.status === "published" ? (
-                              <EyeOff className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                            ) : (
-                              <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                            )}
-                            <span className="hidden md:inline">{p.status === "published" ? "Unpublish" : "Publish"}</span>
-                            <span className="md:hidden">Toggle</span>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Pop Up / Modal "Image Uploaded" (Strictly 0 Corner Radius: rounded-none) */}
       {isModalOpen && (

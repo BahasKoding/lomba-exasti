@@ -36,8 +36,8 @@ export default function LoginPage() {
         if (typeof window !== "undefined") {
           localStorage.setItem("admin_logged_in", "true");
           document.cookie = "admin_logged_in=true; path=/";
+          window.location.href = "/admin";
         }
-        router.push("/admin");
       } else {
         setError(data.error ?? "Invalid email or password.");
         setLoading(false);
@@ -53,7 +53,7 @@ export default function LoginPage() {
       {/* Back to Storefront Link - Floating Top-Left Icon */}
       <Link
         href="/"
-        className="absolute left-8 top-8 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E2DC] bg-white text-[#1F2022] shadow-sm hover:border-[#1F2022] hover:bg-[#1F2022] hover:text-white transition-all duration-200"
+        className="absolute left-8 top-8 z-30 flex h-11 w-11 items-center justify-center rounded-none border border-[#E5E2DC] bg-white text-[#1F2022] shadow-sm hover:border-[#1F2022] hover:bg-[#1F2022] hover:text-white transition-all duration-200"
         title="Back to Storefront"
       >
         <ArrowLeft className="h-5 w-5" />

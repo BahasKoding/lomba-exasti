@@ -29,11 +29,11 @@ const slugify = (value: string) =>
   value
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "") || "produk";
+    .replace(/(^-|-$)/g, "") || "product";
 
 export function normalizeCatalogProduct(raw: unknown, index = 0): CatalogProduct {
   const item = asRecord(raw);
-  const name = asText(item.name ?? item.product_name ?? item.title, `Produk ${index + 1}`);
+  const name = asText(item.name ?? item.product_name ?? item.title, `Product ${index + 1}`);
   const slug = asText(item.slug, slugify(name));
   const optionalCategory = asText(item.category ?? item.category_name ?? item.type);
   const optionalMaterial = asText(item.material ?? item.material_name ?? item.fabric);
@@ -56,7 +56,7 @@ export async function fetchCatalog(): Promise<CatalogProduct[]> {
   const result = await response.json().catch(() => null);
 
   if (!response.ok || !result?.success) {
-    throw new Error(result?.error || "Gagal memuat katalog.");
+    throw new Error(result?.error || "Failed to load catalog.");
   }
 
   const rows = Array.isArray(result.data) ? result.data : [];
@@ -73,7 +73,7 @@ export function formatPrice(price: number) {
 
 export function buildOrderWhatsAppUrl(product: Pick<CatalogProduct, "name" | "price" | "slug">) {
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281234567890";
-  const message = `Halo Admin SmartCap, saya ingin memesan:\n\nProduk: ${product.name}\nHarga: ${formatPrice(product.price)}\nKode: ${product.slug}`;
+  const message = `Hello SmartCap Admin, I would like to order:\n\nProduct: ${product.name}\nPrice: ${formatPrice(product.price)}\nCode: ${product.slug}`;
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
