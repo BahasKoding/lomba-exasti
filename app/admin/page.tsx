@@ -149,7 +149,7 @@ export default function AdminDashboard() {
       <div className="relative rounded-none border border-transparent md:border-none bg-[#D8D4CD]/40 md:bg-transparent p-5 md:p-0 shadow-none space-y-2 md:space-y-2">
         <div className="flex justify-between items-start">
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-[#1F2022]">Bulk Massal</h1>
-          
+
           {/* Info Icon (Mobile Only) */}
           <div className="md:hidden">
             <div className="relative" ref={infoPopupMobileRef}>
@@ -224,39 +224,39 @@ export default function AdminDashboard() {
               <div className="absolute right-0 top-full pt-2 z-50 w-96 animate-in fade-in zoom-in-95 duration-200">
                 <div className="rounded-none border border-[#E5E2DC] bg-white p-6 shadow-xl">
                   <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-base font-extrabold text-[#1F2022]">How It Works</h3>
-                    <p className="mt-1 text-xs text-[#94908C]">
-                      Streamline your catalog management with our intelligent bulk processing workflow designed for effortless curation.
-                    </p>
-                  </div>
-
-                  <div className="space-y-3.5 pt-2 text-xs text-[#1F2022]">
-                    <div>
-                      <p className="font-extrabold text-[#1F2022]">1. Upload Your Collection</p>
-                      <p className="mt-0.5 text-[#94908C]">
-                        Select and upload multiple product images of your caps simultaneously into the studio workspace.
+                    <div className="text-center">
+                      <h3 className="text-base font-extrabold text-[#1F2022]">How It Works</h3>
+                      <p className="mt-1 text-xs text-[#94908C]">
+                        Streamline your catalog management with our intelligent bulk processing workflow designed for effortless curation.
                       </p>
                     </div>
 
-                    <div>
-                      <p className="font-extrabold text-[#1F2022]">2. Intelligent Visual Analysis</p>
-                      <p className="mt-0.5 text-[#94908C]">
-                        Our advanced AI vision engine automatically inspects each piece detecting the category, material texture, and structural details to draft compelling commercial descriptions.
-                      </p>
-                    </div>
+                    <div className="space-y-3.5 pt-2 text-xs text-[#1F2022]">
+                      <div>
+                        <p className="font-extrabold text-[#1F2022]">1. Upload Your Collection</p>
+                        <p className="mt-0.5 text-[#94908C]">
+                          Select and upload multiple product images of your caps simultaneously into the studio workspace.
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="font-extrabold text-[#1F2022]">3. Review & Publish</p>
-                      <p className="mt-0.5 text-[#94908C]">
-                        Examine the generated results in the AI Review suite to ensure absolute perfection before publishing them instantly to your storefront catalog.
-                      </p>
+                      <div>
+                        <p className="font-extrabold text-[#1F2022]">2. Intelligent Visual Analysis</p>
+                        <p className="mt-0.5 text-[#94908C]">
+                          Our advanced AI vision engine automatically inspects each piece detecting the category, material texture, and structural details to draft compelling commercial descriptions.
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="font-extrabold text-[#1F2022]">3. Review & Publish</p>
+                        <p className="mt-0.5 text-[#94908C]">
+                          Examine the generated results in the AI Review suite to ensure absolute perfection before publishing them instantly to your storefront catalog.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
         </div>
 

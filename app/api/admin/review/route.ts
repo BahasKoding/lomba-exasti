@@ -1,44 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 
-const mockReviewData = [
-  {
-    id: 1,
-    name: "Plain Baseball Cap",
-    material: "Cotton Twill",
-    category: "Baseball Cap",
-    description: "Classic plain baseball cap made from high-quality cotton twill, perfect for everyday casual style.",
-    status: "Pending",
-    createdAt: "2026-09-01",
-  },
-  {
-    id: 2,
-    name: "Vintage Bucket Hat",
-    material: "Canvas",
-    category: "Bucket Hat",
-    description: "Vintage style bucket hat made with durable canvas material, ideal for outdoor activities.",
-    status: "Approved",
-    createdAt: "2026-09-02",
-  },
-  {
-    id: 3,
-    name: "Premium Snapback",
-    material: "Polyester",
-    category: "Snapback",
-    description: "Premium adjustable snapback cap, offering a sleek urban look.",
-    status: "Pending",
-    createdAt: "2026-09-02",
-  },
-  {
-    id: 4,
-    name: "Winter Knit Beanie",
-    material: "Wool",
-    category: "Beanie",
-    description: "Warm thick knitted beanie made from soft wool for cold weather adventures.",
-    status: "Rejected",
-    createdAt: "2026-09-01",
-  },
-];
+const mockReviewData: any[] = [];
 
 const normalizeReviewData = (payload: any) => {
   const source = payload && typeof payload === "object" ? payload : {};
