@@ -1,117 +1,128 @@
-# QA Summary
+# BLACKBOX AUTOMATION TEST SUMMARY
 
-## Build Information
+Environment: existing local Next.js 16.3.3 development server
 
-| Field | Value |
-|---|---|
-| Version | Baseline QA `ba2bdf88f3dbe650bb98158628cec708534eaacb` |
-| Branch | `main` |
-| Commit | `ba2bdf88f3dbe650bb98158628cec708534eaacb` |
-| Environment | Local Next.js dev; Microsoft Edge headless via Playwright 1.62.1; configured database identity unknown |
-| URL | `http://127.0.0.1:3000` |
-| Tester | Codex QA |
-| Test Date | 2026-09-04 (Asia/Jakarta) |
+Application URL: http://localhost:3000
 
-## Test Execution Summary
+Browser: Microsoft Edge 153.0.4234.32 (Chromium engine; inherited project label chromium)
 
-| Layer | Total | Pass | Fail | Blocked | Not Run | Needs Confirmation |
-|---|---:|---:|---:|---:|---:|---:|
-| Frontend | 18 | 9 | 6 | 1 | 0 | 2 |
-| Backend/API | 17 | 12 | 5 | 0 | 0 | 0 |
-| Overall | 35 | 21 | 11 | 1 | 0 | 2 |
+Playwright Version: 1.63.0
 
-Pass Rate: **65.63%** — 21 Pass / 32 conclusive executions (`Pass + Fail`). Satu Blocked dan dua Needs Confirmation tidak dimasukkan ke denominator. Sumber: [FE execution](test-execution-fe.tsv) dan [BE execution](test-execution-be.tsv).
+Execution Date: 2026-09-15 (Asia/Jakarta)
 
-`Not Run` menghitung hanya record yang secara eksplisit berstatus Not Run di execution sheets; saat ini tidak ada. Ini tidak berarti seluruh planned scope sudah dieksekusi—gap dan skenario yang belum dapat dijalankan dicatat pada Blocked Testing dan coverage.
+Branch / Commit: qa/setup-testing / 95d549bebf29b3cafc11174b8a741d0d87a1a60c
 
-## Bug Summary
+Run: confirmation-regression
 
-### Frontend Bugs
+## Coverage
 
-| Open | In Progress | Ready to Retest | Closed | Rejected | Duplicate | Total |
-|---:|---:|---:|---:|---:|---:|---:|
-| 4 | 0 | 0 | 0 | 0 | 0 | 4 |
+27 automated: 22 passed, 5 failed, 0 skipped. Product failures 5; automation failures 0; unclassified 0.
 
-### Backend Bugs
+Automated blocked: 0. Two additional business journeys are BLOCKED before automation (valid auth lifecycle; admin upload/review/save). They are not counted as executed tests. Browser-only BE observations: 2, both Pass; do not add them to the automated total.
 
-| Open | In Progress | Ready to Retest | Closed | Rejected | Duplicate | Total |
-|---:|---:|---:|---:|---:|---:|---:|
-| 4 | 0 | 0 | 0 | 0 | 0 | 4 |
+Modules tested: Home/About, Catalog, Product, Cart, Login, public responsive navigation. [Application and flow mapping](blackbox-plan-2026-09-15.md). [27 case definitions](test-cases.tsv). [Exact per-case results](coverage-matrix.md).
 
-### Critical Findings
+## Findings from this run
 
-| Bug ID | Layer | Feature | Title | Severity | Priority | Status |
-|---|---|---|---|---|---|---|
-| BUG-BE-001 | Backend | Admin guard | Cookie palsu membuka admin | Critical | P0 | Open |
-| BUG-BE-002 | Backend | API authorization | API admin dapat diakses tanpa sesi | Critical | P0 | Open |
-| BUG-FE-001 | Frontend | Empty state | Cart kosong terisi lagi | High | P0 | Open |
-| BUG-FE-002 | Frontend | Save selected | Selection berubah setelah reject | High | P0 | Open |
-| BUG-FE-003 | Frontend | Add state transition | Produk identik menjadi dua row | High | P0 | Open |
-| BUG-FE-004 | Frontend | File validation | File non-image mengaktifkan Generate | High | P0 | Open |
-| BUG-BE-004 | Backend | Create validation | Product invalid mengekspos exception | High | P0 | Open |
+- Critical: 0 newly confirmed.
+- Major Business Flow: 2 — BUG-FE-009: Home topi 4 Rp65.000 becomes Rp150.000 in Cart/composer;  BUG-FE-008: related-product price differs from Catalog, Cart and WhatsApp order use Rp149.000 instead of Rp45.000.
+- Major Layout: 0 confirmed.
+- Minor Business Flow: 2 — cart color is hidden (BUG-FE-005); footer About opens Home anchor (BUG-FE-006).
+- Minor Layout/UI: 1 — unnamed quantity controls (BUG-FE-007).
+- New Backend defects: 0.
 
-## Test Coverage Summary
+Findings are kept by root-cause layer: [Frontend report](bug-report-fe.md), [Backend report](bug-report-be.md). No combined bug register. Historical BUG-FE-002/004 and BUG-BE-001..004 retain Open; not reproduced in this session. BUG-FE-001/003 are Closed after successful UI retest.
 
-| Area | Status | Current evidence |
+## Critical business flow status
+
+| Flow | Status | Evidence |
 |---|---|---|
-| P0 Critical Flow | Partial | Safe public/admin-negative paths executed; valid login and mutation journey incomplete; P0 defects open |
-| Frontend | Partial | Public, cart, auth negative, admin read-only, review, settings, and responsive public paths executed |
-| Backend/API | Partial | Catalog, auth negative, authorization, and validation boundaries executed; mutation lifecycle incomplete |
-| Authentication | Partial | Invalid/empty/malformed and direct guard tested; valid credential lifecycle blocked |
-| Authorization | Partial | Forged/missing session tested and failed; broader mutation enforcement not safely executed |
-| Validation | Partial | Multiple FE/BE negative boundaries executed; known gaps remain |
-| Positive | Partial | Public browse/cart/settings and safe API reads executed; valid admin lifecycle incomplete |
-| Negative | Partial | Auth, API payload, empty state, duplicate state, and file-input paths executed |
-| Edge | Partial | Boundary, repeated add, unknown slug, loading, and status cases partially covered |
-| Automation | Not Tested | No permanent runnable regression suite in the current worktree; exploratory scripts are evidence harnesses only |
+| Catalog → add → cart edit/select/remove → refresh | PASS | BB-001..005 |
+| Detail → Navy + quantity → cart → WhatsApp composer | PASS | BB-006 |
+| Two colors of the same product | PASS | BB-007 |
+| Related product → cart → matching order price | FAIL | BB-009 |
+| Home Collection / Best Selling → cart → order price | FAIL | BB-026; inspect evidence for each section |
+| Mobile Home Feature 1/2 → visible slide | PASS | BB-027 |
+| Invalid login → error → retry | PASS | BB-019 |
+| Valid login → admin → logout/session | BLOCKED | Test credentials unavailable |
+| Admin upload → AI → review/save → persisted catalog | BLOCKED | Valid session and admin UI discovery unavailable |
 
-## Blocked Testing
+## Major Findings
 
-| Feature | Test Case | Reason | Required Action |
-|---|---|---|---|
-| Valid admin login | AUTH-001 | QA admin credential tidak tersedia | Sediakan credential test melalui environment |
-| Valid logout lifecycle | AUTH-005 | Membutuhkan sesi valid, bukan forged cookie | Sediakan credential test dan sesi QA |
-| Ingest → review → save → publish → catalog | E2E-ADMIN-001 | QA DB, credential, cleanup policy, dan Gemini stub/live policy belum dikonfirmasi | Sediakan environment/data terisolasi dan setujui AI stub/live policy |
-| Product create/publish persistence | API-PROD-001, API-PROD-003 | Identitas database aman untuk mutation belum diketahui | Tetapkan QA database dan cleanup scope |
-| Ingest success | API-ING-001 | AI stub/live call dan budget belum disetujui | Tetapkan deterministic stub atau budget live call |
-| Admin mobile drawer | FE-MOBILE-002 | Isolated rerun mengalami admin hydration/data-loading instability | Ulangi pada authenticated QA environment yang stabil |
+### Business Flow
 
-## Current QA Risks
+- BUG-FE-008: related-product ordering uses Rp149.000 for topi 3 instead of catalog Rp45.000. Incorrect price persists after refresh and appears in the WhatsApp composer.
 
-- Dua defect Critical/P0 masih membuka route dan API admin tanpa valid authorization.
-- P0 admin business journey belum selesai karena credential, QA database, dan AI policy belum tersedia.
-- Product API dapat menghasilkan 500 dan mengekspos internal exception untuk payload invalid.
-- Empat defect frontend P0 memengaruhi cart state, review selection, dan upload validation.
-- Fallback UI dapat menyamarkan catalog API failure; expected behavior masih Needs Confirmation.
-- Belum ada permanent automated regression suite pada current worktree.
+- BUG-FE-009: Home Collection displays topi 4 at Rp65.000, but Add places it in Cart and WhatsApp composer at Rp150.000; wrong price persists after refresh.
 
-## QA Release Recommendation
+### Layout / UI
 
-**NOT READY**
+- None confirmed.
 
-Dua defect authorization Critical/P0 masih Open, beberapa P0 frontend flow gagal, dan valid admin mutation journey masih blocked. Rekomendasi ini mengikuti evidence QA saat ini tanpa mengasumsikan release criteria tambahan.
+## Minor Findings
 
-## Developer Action Required
+### Business Flow
 
-| Priority | Bug ID | Layer | Feature | Action | Status |
-|---:|---|---|---|---|---|
-| 1 | BUG-BE-001 | Backend | Admin guard | Validasi session token pada middleware sebelum memberi akses admin | Open |
-| 2 | BUG-BE-002 | Backend | API authorization | Terapkan authentication/authorization pada seluruh endpoint admin | Open |
-| 3 | BUG-FE-001 | Frontend | Cart empty state | Pertahankan empty cart setelah remove dan refresh | Open |
-| 4 | BUG-FE-002 | Frontend | Review selection | Pertahankan mapping selected row setelah rejected row difilter | Open |
-| 5 | BUG-FE-003 | Frontend | Cart add | Gabungkan produk identik atau gunakan key/identity unik yang konsisten | Open |
-| 6 | BUG-FE-004 | Frontend | Upload validation | Tolak file non-image sebelum preview dan Generate | Open |
-| 7 | BUG-BE-004 | Backend | Product validation | Return 4xx terstruktur sebelum slugify/insert | Open |
-| 8 | BUG-BE-003 | Backend | Login validation | Tangani malformed JSON sebagai 4xx JSON terstruktur | Open |
+- BUG-FE-005: selected color is absent from the cart summary; composer retains it.
+- BUG-FE-006: footer About opens a Home anchor instead of the About content.
 
-## Retest Workflow
+### Layout / UI
 
-`Open → In Progress → Ready to Retest → QA Retest`
+- BUG-FE-007: quantity plus/minus controls lack accessible names.
 
-- Jika QA retest Pass: `Ready to Retest → Closed`.
-- Jika QA retest Fail: `Ready to Retest → Open`.
-- Perubahan code saja tidak menutup bug; hanya evidence QA retest yang dapat memindahkan `Ready to Retest` menjadi `Closed`.
+## Need Confirmation
 
-## Traceability
+- NC-BB-001: Which color choices shown on detail are actually supported for each product? UI exposes defaults; catalog-specific variant requirements unavailable.
+- NC-BB-002: Should search/sort and cart selection survive navigation/refresh? Item persistence is verified; persistence rules for these filters/selections are unspecified.
+- NC-BB-003: Which admin QA account and test dataset can complete authorized UI creation/save checks? No credentials supplied.
 
-Gunakan rantai: Bug ID → Related Test Case → FE/BE Test Execution → Evidence. Detail tersedia di [Frontend Bug Report](bug-report-fe.md), [Backend Bug Report](bug-report-be.md), [FE execution](test-execution-fe.tsv), dan [BE execution](test-execution-be.tsv).
+These are requirement/test-data questions, not product bugs. Historical candidates retain their prior evidence; current unknown-slug check BB-016 passes Product Not Found.
+
+## Automation Issues
+
+- Missing Browser connection, bundled Chromium and ffmpeg handled with installed Edge and suite-local video disabled. Screenshots/traces retained. No dependency/config changes.
+- Initial capitalization locator failure fixed using DOM textContent.
+- Primary CTA, heading name and mobile dialog locators corrected. No failures are hidden or skipped; see JSON evidence.
+- Raw earlier reports are retained as diagnostic evidence and are superseded by this run.
+
+## Blockers and regression risk
+
+- Two admin journeys blocked by unavailable valid credentials; no auth bypass attempted.
+- Full release quality is unproven: admin mutations, actual authorization, AI and production build are outside executed coverage.
+- Historical security bugs remain Open and require separate authorized retest; do not treat this session as confirmation they still reproduce.
+- Cart colors cannot be reviewed directly. Related-product pricing is a confirmed order-data defect.
+
+## Final QA Assessment
+
+NOT READY for QA sign-off: related-product ordering has incorrect pricing and the admin P0 journeys remain blocked. Fix the recorded product defects separately, provide QA credentials, then retest affected cases and repeat the core regression.
+
+Retest lifecycle: developer marks a fix Ready to Retest → QA runs linked cases with evidence → Closed only after Pass. No product fix performed by QA.
+
+
+## Regression comparison
+
+resumed: 22 Pass, 5 Fail. confirmation-regression: 22 Pass, 5 Fail; failed IDs BB-008, BB-009, BB-015, BB-022, BB-026. Skipped 0; flaky 0. These are repeated executions of 27 scenarios, not additional distinct coverage.
+
+## Files and safety
+
+Created: qa/automation/blackbox/ (4 TypeScript specs, helpers, cases, report utility, README); docs/qa/blackbox-plan-2026-09-15.md; five blackbox exploratory scripts; current evidence folder.
+
+Modified: test-cases.tsv, FE/BE execution TSVs, FE/BE bug reports, coverage-matrix.md, qa-progress.md, qa-summary.md. Legacy records preserved; current handoff reflects this run.
+
+Deleted: none. Production source, frontend/backend implementation, schema/database and application configuration were not edited. Existing developer changes were not overwritten. Final git/hash audit passed: production changes by QA = 0; baseline lockfile SHA256 unchanged; no deletion or staged changes.
+
+Evidence: [JSON report](evidence/blackbox-2026-09-15/confirmation-regression-results.json); screenshots/traces under the adjacent confirmation-regression-run folder.
+
+## Intervening regression evidence
+
+The final-regression attempt recorded 21 Pass / 6 Fail: BB-010 lacked the topi 3 detail heading and BB-026 showed Home without product cards before any price assertion. These two runtime availability failures remain NEEDS CONFIRMATION; no internal cause was inferred. See final-regression-results.json and retained traces. The suite was rerun unchanged as confirmation-regression. A matching rerun does not erase the intermittent failure or prove environment stability.
+
+## NC-BB-004: intermittent runtime availability
+
+CONFIRMED FROM RUNTIME: final-regression BB-010 remained at "Loading product details..." at the 5-second assertion deadline; BB-026 Home had no product cards at its deadline. NEEDS CONFIRMATION: data/network/server cause and acceptable loading SLA. No application internals were inspected and no wait/assertion was relaxed. Both failing attempts remain in FE execution and final-regression-results.json; prior pricing evidence remains valid.
+
+Execution note: the earlier continuation run was interrupted at the user’s pause request and has no completed JSON report. Its partial output is diagnostic only. The resumed and final-regression reports supersede it.
+
+## Final verification
+
+Targeted TypeScript check and git diff --check: Pass. FE register: 9 total, 7 Open, 2 Closed (5 reproduced now; 2 historical Open untested). BE register: 4 historical Open, 0 newly confirmed. [Safety, exact file inventory and coverage limits](evidence/blackbox-2026-09-15/safety-audit.md).

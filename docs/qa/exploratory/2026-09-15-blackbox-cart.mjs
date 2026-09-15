@@ -1,0 +1,38 @@
+import { chromium } from 'playwright';
+import { writeFile } from 'node:fs/promises';
+const dir = 'docs/qa/evidence/blackbox-2026-09-15';
+const browser = await chromium.launch({ channel: 'msedge', headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const page = await context.newPage();
+const origin = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
+const rows = [];
+async function capture(label) {
+  const row = { label, url: page.url(), snapshot: await page.locator('body').ariaSnapshot() };
+  rows.push(row); console.log(JSON.stringify(row));
+  await page.screenshot({ path: `${dir}/${label}.png`, fullPage: true });
+}
+await page.goto(origin + '/katalog');
+await page.getByText('Loading catalog items...').waitFor({ state: 'hidden' });
+await page.getByRole('link').filter({ has: page.getByRole('heading', { level: 3 }) }).first().click();
+await page.waitForURL('**/produk/**');
+await page.getByRole('heading', { level: 1 }).waitFor();
+await capture('detail-ready');
+console.log(JSON.stringify({ controls: await page.locator('button,input,select,a').evaluateAll(nodes => nodes.map(n => ({tag:n.tagName, text:n.textContent, label:n.getAttribute('aria-label'), title:n.getAttribute('title'), href:n.getAttribute('href'), type:n.getAttribute('type')}))) }));
+await page.goto(origin + '/katalog');
+await page.getByText('Loading catalog items...').waitFor({ state: 'hidden' });
+await page.getByRole('button', { name: /Tambah .* ke Keranjang/ }).first().click();
+await capture('catalog-add-feedback');
+await page.getByRole('banner').getByRole('link', { name: 'Cart', exact: true }).click();
+await page.waitForURL('**/cart');
+await page.getByRole('heading', { name: 'YOUR CART' }).waitFor();
+await capture('cart-one-item');
+console.log(JSON.stringify({ cartControls: await page.locator('main button,main input,main a').evaluateAll(nodes => nodes.map(n => ({tag:n.tagName,text:n.textContent,label:n.getAttribute('aria-label'),title:n.getAttribute('title'),href:n.getAttribute('href'),type:n.getAttribute('type')}))) }));
+await page.reload();
+await page.getByRole('heading', { name: 'YOUR CART' }).waitFor();
+await capture('cart-refreshed');
+await page.setViewportSize({ width: 390, height: 844 });
+await page.goto(origin + '/katalog');
+await page.getByText('Loading catalog items...').waitFor({ state: 'hidden' });
+await capture('mobile-catalog');
+await writeFile(`${dir}/cart-discovery.json`, JSON.stringify(rows,null,2));
+await browser.close();
